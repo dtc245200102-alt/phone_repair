@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}AI tóm tắt - {{ ticket.code }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-3" style="max-width: 700px;">
+  <a href="{% url 'technician_ticket_detail' ticket.id %}" class="text-decoration-none">&larr; Về trang phiếu {{ ticket.code }}</a>
+
+  <h4 class="mt-2 mb-3">✨ AI tóm tắt tình trạng máy</h4>
+  <p class="text-muted">Tổng hợp mô tả lỗi ban đầu + ghi chú kỹ thuật thành đoạn tóm tắt ngắn gọn. Xem trước, chỉnh sửa nếu cần, rồi mới lưu / gửi.</p>
+
+  {% if error %}
+  <div class="alert alert-danger">{{ error }}</div>
+  {% endif %}
+
+  {% if draft_summary is not None %}
+    <div class="card mb-3 border-warning">
+      <div class="card-body">
+        <h6>📝 Bản nháp (chưa lưu, chưa gửi cho ai)</h6>
+        <form method="post">
+          {% csrf_token %}
+          <textarea name="summary" class="form-control mb-3" rows="5">{{ draft_summary }}</textarea>
+          <div class="d-flex flex-wrap gap-2">
+            <button type="submit" name="action" value="save" class="btn btn-outline-secondary">💾 Lưu (chưa gửi)</button>
+            <button type="submit" name="action" value="send_customer" class="btn btn-success">📤 Gửi cho khách hàng</button>
+            <button type="submit" name="action" value="send_admin" class="btn btn-primary">📤 Gửi cho Admin</button>
+          </div>
+        </form>
+      </div>
+    </div>
+    <form method="post">
+      {% csrf_token %}
+      <button type="submit" name="action" value="generate" class="btn btn-link px-0">🔄 Tạo lại nháp khác</button>
+    </form>
+  {% else %}
+    <div class="card mb-3">
+      <div class="card-body">
+        <h6>Bản tóm tắt hiện tại (đã lưu)</h6>
+        {% if ticket.ai_summary %}
+          <p style="white-space: pre-line;">{{ ticket.ai_summary }}</p>
+          <small class="text-muted">Tạo lúc: {{ ticket.ai_last_generated_at }}</small>
+        {% else %}
+          <p class="text-muted fst-italic">Chưa có bản tóm tắt nào.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <form method="post" onsubmit="const b=this.querySelector('button'); setTimeout(function(){ b.disabled=true; b.innerHTML='⏳ Đang tạo, vui lòng đợi...'; }, 0);">
+      {% csrf_token %}
+      <button type="submit" name="action" value="generate" class="btn btn-info text-white">🔄 {% if ticket.ai_summary %}Tạo lại{% else %}Tạo{% endif %} tóm tắt AI</button>
+    </form>
+  {% endif %}
+</div>
+{% endblock %}

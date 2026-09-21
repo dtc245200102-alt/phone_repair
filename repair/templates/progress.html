@@ -1,0 +1,239 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="row justify-content-center my-4">
+    <div class="col-lg-10">
+
+        <!-- TIÊU ĐỀ -->
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <div>
+                <h2 class="fw-bold mb-1">
+                    <i class="bi bi-tools text-primary me-2"></i>
+                    Tiến Độ Sửa Chữa
+                </h2>
+
+                <p class="text-secondary small mb-0">
+                    Theo dõi trạng thái các thiết bị đang sửa tại KhanhThien SmartPhone
+                </p>
+            </div>
+
+            <a href="{% url 'ai_diagnose' %}"
+               class="btn btn-outline-primary rounded-pill btn-sm fw-bold">
+                <i class="bi bi-plus-lg me-1"></i>
+                Đặt lịch mới
+            </a>
+        </div>
+
+
+        {% if tickets %}
+
+        <!-- DANH SÁCH PHIẾU -->
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle mb-0">
+
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-4">Mã phiếu</th>
+                            <th>Thiết bị</th>
+                            <th>Mô tả sự cố</th>
+                            <th>Trạng thái</th>
+                            <th class="pe-4 text-end">Ngày tiếp nhận</th>
+                        </tr>
+                    </thead>
+
+
+                    <tbody>
+
+                        {% for ticket in tickets %}
+
+                        <tr>
+
+                            <!-- MÃ PHIẾU -->
+                            <td class="ps-4 fw-bold text-primary">
+                                #{{ ticket.id }}
+                            </td>
+
+
+                            <!-- THIẾT BỊ -->
+                            <td>
+                                <div class="fw-bold">
+                                    {{ ticket.device.model_name }}
+                                </div>
+
+                                <div class="text-muted small">
+                                    {{ ticket.device.brand }}
+                                </div>
+
+                                {% if ticket.device.imei %}
+                                <div class="text-muted small">
+                                    IMEI: {{ ticket.device.imei }}
+                                </div>
+                                {% endif %}
+                            </td>
+
+
+                            <!-- MÔ TẢ SỰ CỐ -->
+                            <td>
+                                <span
+                                    class="text-truncate d-inline-block"
+                                    style="max-width: 250px;"
+                                    title="{{ ticket.issue_description }}"
+                                >
+                                    {{ ticket.issue_description }}
+                                </span>
+                            </td>
+
+
+                            <!-- TRẠNG THÁI -->
+                            <td style="min-width: 230px;">
+
+                                {% if ticket.status == 'PENDING' %}
+
+                                    <span class="badge bg-warning text-dark rounded-pill px-3 py-2">
+                                        <i class="bi bi-hourglass-split me-1"></i>
+                                        Chờ xử lý
+                                    </span>
+
+                                    <div class="small text-muted mt-2">
+                                        Cửa hàng đã tiếp nhận phiếu sửa chữa.
+                                    </div>
+
+
+                                {% elif ticket.status == 'IN_PROGRESS' %}
+
+                                    <span class="badge bg-info text-dark rounded-pill px-3 py-2">
+                                        <i class="bi bi-tools me-1"></i>
+                                        Đang sửa chữa
+                                    </span>
+
+                                    <div class="small text-muted mt-2">
+                                        Kỹ thuật viên đang sửa thiết bị của bạn.
+                                    </div>
+
+
+                                {% elif ticket.status == 'DONE' %}
+
+                                    <span class="badge bg-success rounded-pill px-3 py-2">
+                                        <i class="bi bi-check-circle me-1"></i>
+                                        Đã hoàn thành
+                                    </span>
+
+                                    <div class="small text-muted mt-2">
+                                        Thiết bị đã sửa xong và đang chờ bàn giao.
+                                    </div>
+
+
+                                {% elif ticket.status == 'DELIVERED' %}
+
+                                    <span class="badge bg-primary rounded-pill px-3 py-2">
+                                        <i class="bi bi-box-seam me-1"></i>
+                                        Đã giao khách
+                                    </span>
+
+                                    <div class="small text-muted mt-2">
+                                        Thiết bị đã được bàn giao cho khách hàng.
+                                    </div>
+
+
+                                {% elif ticket.status == 'CANCELLED' %}
+
+                                    <span class="badge bg-danger rounded-pill px-3 py-2">
+                                        <i class="bi bi-x-circle me-1"></i>
+                                        Đã hủy
+                                    </span>
+
+                                    <div class="small text-muted mt-2">
+                                        Phiếu sửa chữa này đã được hủy.
+                                    </div>
+
+
+                                {% else %}
+
+                                    <span class="badge bg-secondary rounded-pill px-3 py-2">
+                                        {{ ticket.get_status_display }}
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <!-- NGÀY TIẾP NHẬN -->
+                            <td class="pe-4 text-end text-secondary small">
+
+                                {{ ticket.created_at|date:"d/m/Y H:i" }}
+
+                                {% if ticket.updated_at %}
+                                <div class="text-muted mt-1">
+                                    Cập nhật:
+                                    {{ ticket.updated_at|date:"d/m/Y H:i" }}
+                                </div>
+                                {% endif %}
+
+                            </td>
+
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+
+        <!-- THÔNG BÁO -->
+        <div class="alert alert-light border rounded-4 mt-3 small">
+
+            <i class="bi bi-info-circle text-primary me-2"></i>
+
+            Trạng thái sửa chữa được cập nhật bởi nhân viên kỹ thuật.
+            Bạn có thể tải lại trang để xem trạng thái mới nhất của thiết bị.
+
+        </div>
+
+
+        {% else %}
+
+        <!-- KHÔNG CÓ PHIẾU -->
+        <div class="card border-0 shadow-sm rounded-4 p-5 text-center bg-white my-3">
+
+            <div class="my-3">
+                <i class="bi bi-inbox display-1 text-muted opacity-50"></i>
+            </div>
+
+            <h4 class="fw-bold text-dark">
+                Chưa có thiết bị nào đang sửa
+            </h4>
+
+            <p class="text-secondary small mb-4">
+                Bạn hiện chưa gửi thiết bị nào hoặc chưa có lịch sử sửa chữa trong hệ thống.
+            </p>
+
+            <div>
+
+                <a href="{% url 'ai_diagnose' %}"
+                   class="btn btn-primary rounded-pill px-4 fw-bold">
+
+                    <i class="bi bi-cpu me-1"></i>
+                    Chẩn đoán & Đặt lịch ngay
+
+                </a>
+
+            </div>
+
+        </div>
+
+        {% endif %}
+
+    </div>
+</div>
+
+{% endblock %}

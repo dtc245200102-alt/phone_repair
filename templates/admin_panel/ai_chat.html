@@ -1,0 +1,474 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block content_title %}Trợ lý AI Quản lý{% endblock %}
+
+{% block extrastyle %}
+<link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css"
+>
+<style>
+    #jazzy-navbar {
+        position: sticky !important;
+        top: 0 !important;
+        z-index: 1050 !important;
+    }
+
+    .main-header {
+        position: sticky !important;
+        top: 0 !important;
+        z-index: 1050 !important;
+    }
+    .ai-chat-shell {
+        max-width: 900px;
+        margin: 1.5rem auto;
+    }
+
+    .ai-chat-card {
+        border: 1px solid rgba(0, 0, 0, .06);
+        border-radius: 1.25rem;
+        overflow: hidden;
+        background: #fff;
+        box-shadow: 0 .5rem 1.5rem rgba(0, 0, 0, .06);
+    }
+
+    .ai-chat-header {
+        background: linear-gradient(135deg, #0d6efd 0%, #0dcaf0 100%);
+        color: #fff;
+        padding: 1.25rem 1.5rem;
+    }
+
+    .ai-chat-header .status-dot {
+        width: .5rem;
+        height: .5rem;
+        border-radius: 50%;
+        background: #22c55e;
+        display: inline-block;
+        margin-right: .4rem;
+        animation: ai-pulse 1.6s ease-in-out infinite;
+    }
+
+    @keyframes ai-pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: .35; }
+    }
+
+    .ai-chat-body {
+        height: 58vh;
+        min-height: 380px;
+        overflow-y: auto;
+        padding: 1.25rem;
+        background: #f7f9fc;
+    }
+
+    .ai-msg-row {
+        display: flex;
+        align-items: flex-start;
+        gap: .6rem;
+        margin-bottom: 1rem;
+    }
+
+    .ai-msg-row.user {
+        flex-direction: row-reverse;
+    }
+
+    .ai-avatar {
+        width: 2.1rem;
+        height: 2.1rem;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.05rem;
+        flex-shrink: 0;
+    }
+
+    .ai-avatar.ai { background: #e7f1ff; }
+    .ai-avatar.user { background: #dff5e8; }
+
+    .ai-bubble {
+        max-width: 78%;
+        padding: .75rem 1rem;
+        border-radius: 1rem;
+        white-space: pre-line;
+        font-size: .93rem;
+        line-height: 1.5;
+        box-shadow: 0 .1rem .4rem rgba(0, 0, 0, .04);
+    }
+
+    .ai-msg-row.ai .ai-bubble {
+        background: #fff;
+        border-top-left-radius: .25rem;
+    }
+
+    .ai-msg-row.user .ai-bubble {
+        background: #0d6efd;
+        color: #fff;
+        border-top-right-radius: .25rem;
+    }
+
+    .ai-time {
+        font-size: .7rem;
+        color: #9aa4b2;
+        margin-top: .2rem;
+    }
+
+    .ai-msg-row.user .ai-time {
+        text-align: right;
+    }
+
+    .ai-data-block {
+        max-width: 92%;
+        margin: -.35rem 0 1rem 2.7rem;
+    }
+
+    .ai-data-block table {
+        font-size: .85rem;
+        background: #fff;
+        border-radius: .75rem;
+        overflow: hidden;
+    }
+
+    .ai-quick-questions {
+        padding: .75rem 1.25rem;
+        background: #fff;
+        border-top: 1px solid rgba(0, 0, 0, .06);
+        display: flex;
+        flex-wrap: wrap;
+        gap: .5rem;
+    }
+
+    .ai-quick-btn {
+        border: 1px solid #cfe2ff;
+        background: #f0f7ff;
+        color: #0d6efd;
+        border-radius: 2rem;
+        padding: .35rem .9rem;
+        font-size: .82rem;
+        transition: transform .12s ease, background .12s ease;
+    }
+
+    .ai-quick-btn:hover {
+        background: #0d6efd;
+        color: #fff;
+        transform: translateY(-1px);
+    }
+
+    .ai-chat-inputbar {
+        display: flex;
+        gap: .6rem;
+        padding: 1rem 1.25rem 1.25rem;
+        background: #fff;
+    }
+
+    .ai-chat-inputbar input {
+        border-radius: 2rem;
+        padding: .65rem 1.1rem;
+    }
+
+    .ai-chat-inputbar button {
+        border-radius: 2rem;
+        padding: .5rem 1.3rem;
+    }
+
+    .ai-typing span {
+        display: inline-block;
+        width: .4rem;
+        height: .4rem;
+        margin-right: .2rem;
+        border-radius: 50%;
+        background: #9aa4b2;
+        animation: ai-bounce 1s infinite ease-in-out;
+    }
+
+    .ai-typing span:nth-child(2) { animation-delay: .15s; }
+    .ai-typing span:nth-child(3) { animation-delay: .3s; }
+
+    @keyframes ai-bounce {
+        0%, 80%, 100% { transform: translateY(0); opacity: .5; }
+        40% { transform: translateY(-.3rem); opacity: 1; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="col-12">
+<div class="ai-chat-shell">
+    <div class="ai-chat-card">
+        <div class="ai-chat-header d-flex justify-content-between align-items-center flex-wrap">
+            <div>
+                <h5 class="mb-1 fw-bold">🤖 Trợ lý AI Quản lý</h5>
+                <div class="small opacity-75">
+                    Trợ lý thông minh hỗ trợ Quản lý phân tích hoạt động KhanhThien SmartPhone
+                </div>
+            </div>
+            <div class="small mt-2 mt-md-0">
+                <span class="status-dot"></span>AI đang hoạt động
+            </div>
+        </div>
+
+        <div id="ai-chat-body" class="ai-chat-body"></div>
+
+        <div id="ai-quick-questions" class="ai-quick-questions"></div>
+
+        <div class="ai-chat-inputbar">
+            <input
+                type="text"
+                id="ai-chat-input"
+                class="form-control"
+                placeholder="Nhập câu hỏi cho Trợ lý AI Quản lý..."
+                autocomplete="off"
+            >
+            <button id="ai-chat-send" type="button" class="btn btn-primary">
+                <i class="bi bi-send-fill me-1"></i>Gửi
+            </button>
+        </div>
+    </div>
+</div>
+</div>
+
+{{ history_json|json_script:"ai-chat-history" }}
+{{ quick_questions|json_script:"ai-quick-questions-data" }}
+{% csrf_token %}
+{% endblock %}
+
+{% block extrajs %}
+<script>
+(function () {
+    "use strict";
+
+    var API_URL = "{% url 'admin_ai_chat_api' %}";
+    var QUICK_QUESTIONS = JSON.parse(document.getElementById("ai-quick-questions-data").textContent);
+
+    var body = document.getElementById("ai-chat-body");
+    var quickWrap = document.getElementById("ai-quick-questions");
+    var input = document.getElementById("ai-chat-input");
+    var sendBtn = document.getElementById("ai-chat-send");
+    var csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
+
+    function scrollToBottom() {
+        body.scrollTop = body.scrollHeight;
+    }
+
+    function escapeHtml(text) {
+        var div = document.createElement("div");
+        div.innerText = text == null ? "" : String(text);
+        return div.innerHTML;
+    }
+
+    function renderDataBlock(dataType, data) {
+        if (!data) { return ""; }
+
+        if (dataType === "ticket_list" && data.length) {
+            var rows = data.map(function (t) {
+                return "<tr>" +
+                    "<td>" + escapeHtml(t.code) + "</td>" +
+                    "<td>" + escapeHtml(t.customer) + "</td>" +
+                    "<td>" + escapeHtml(t.device) + "</td>" +
+                    "<td>" + escapeHtml(t.status) + "</td>" +
+                    "<td>" + escapeHtml(t.created_at) + "</td>" +
+                    "</tr>";
+            }).join("");
+            return '<div class="ai-data-block table-responsive"><table class="table table-sm table-bordered mb-0">' +
+                "<thead class='table-light'><tr><th>Mã phiếu</th><th>Khách hàng</th><th>Thiết bị</th>" +
+                "<th>Trạng thái</th><th>Thời gian</th></tr></thead><tbody>" + rows + "</tbody></table></div>";
+        }
+
+        if (dataType === "ticket_delayed" && data.length) {
+            var drows = data.map(function (t) {
+                return "<tr>" +
+                    "<td>" + escapeHtml(t.code) + "</td>" +
+                    "<td>" + escapeHtml(t.device) + "</td>" +
+                    "<td>" + escapeHtml(t.status) + "</td>" +
+                    "<td>" + escapeHtml(t.days_processing) + " ngày</td>" +
+                    "</tr>";
+            }).join("");
+            return '<div class="ai-data-block table-responsive"><table class="table table-sm table-bordered mb-0">' +
+                "<thead class='table-light'><tr><th>Mã phiếu</th><th>Thiết bị</th><th>Trạng thái</th>" +
+                "<th>Số ngày xử lý</th></tr></thead><tbody>" + drows + "</tbody></table></div>";
+        }
+
+        if (dataType === "low_stock" && data.length) {
+            var lrows = data.map(function (p) {
+                return "<tr>" +
+                    "<td>" + escapeHtml(p.name) + "</td>" +
+                    "<td>" + escapeHtml(p.category) + "</td>" +
+                    "<td>" + escapeHtml(p.stock) + "</td>" +
+                    "<td>" + escapeHtml(p.min_stock_threshold) + "</td>" +
+                    "</tr>";
+            }).join("");
+            return '<div class="ai-data-block table-responsive"><table class="table table-sm table-bordered mb-0">' +
+                "<thead class='table-light'><tr><th>Linh kiện</th><th>Loại</th><th>Tồn kho</th>" +
+                "<th>Mức tối thiểu</th></tr></thead><tbody>" + lrows + "</tbody></table></div>";
+        }
+
+        if (dataType === "part_list" && data.length) {
+            var isTopParts = Object.prototype.hasOwnProperty.call(data[0], "quantity");
+            var head = isTopParts
+                ? "<tr><th>#</th><th>Linh kiện</th><th>Số lượng sử dụng</th><th>Số phiếu</th></tr>"
+                : "<tr><th>#</th><th>Nhóm</th><th>Số lượt</th></tr>";
+            var prows = data.map(function (p, i) {
+                return isTopParts
+                    ? "<tr><td>" + (i + 1) + "</td><td>" + escapeHtml(p.name) + "</td><td>" +
+                        escapeHtml(p.quantity) + "</td><td>" + escapeHtml(p.ticket_count) + "</td></tr>"
+                    : "<tr><td>" + (i + 1) + "</td><td>" + escapeHtml(p.category) + "</td><td>" +
+                        escapeHtml(p.count) + "</td></tr>";
+            }).join("");
+            return '<div class="ai-data-block table-responsive"><table class="table table-sm table-bordered mb-0">' +
+                "<thead class='table-light'>" + head + "</thead><tbody>" + prows + "</tbody></table></div>";
+        }
+
+        if (dataType === "warning" && data.length) {
+            var icon = { red: "🔴", orange: "🟠", yellow: "🟡" };
+            var items = data.map(function (w) {
+                return "<li class='mb-1'>" + (icon[w.level] || "⚠️") + " " + escapeHtml(w.text) + "</li>";
+            }).join("");
+            return '<div class="ai-data-block"><ul class="list-unstyled bg-white rounded-3 p-3 mb-0 shadow-sm">' + items + "</ul></div>";
+        }
+
+        if (dataType === "recommendation" && data.length) {
+            var ritems = data.map(function (t, i) {
+                return "<li class='mb-1'>" + (i + 1) + ". " + escapeHtml(t) + "</li>";
+            }).join("");
+            return '<div class="ai-data-block"><ol class="mb-0 bg-white rounded-3 p-3 shadow-sm" style="list-style:none;">' + ritems + "</ol></div>";
+        }
+
+        return "";
+    }
+
+    function renderMessage(msg) {
+        var row = document.createElement("div");
+        row.className = "ai-msg-row " + (msg.sender === "user" ? "user" : "ai");
+
+        var avatar = document.createElement("div");
+        avatar.className = "ai-avatar " + (msg.sender === "user" ? "user" : "ai");
+        avatar.innerText = msg.sender === "user" ? "👤" : "🤖";
+
+        var col = document.createElement("div");
+
+        var bubble = document.createElement("div");
+        bubble.className = "ai-bubble";
+        bubble.innerHTML = escapeHtml(msg.message).replace(/\n/g, "<br>");
+
+        var time = document.createElement("div");
+        time.className = "ai-time";
+        time.innerText = msg.created_at || "";
+
+        col.appendChild(bubble);
+        col.appendChild(time);
+        row.appendChild(avatar);
+        row.appendChild(col);
+        body.appendChild(row);
+
+        var dataHtml = renderDataBlock(msg.data_type, msg.data);
+        if (dataHtml) {
+            var wrap = document.createElement("div");
+            wrap.innerHTML = dataHtml;
+            body.appendChild(wrap.firstChild);
+        }
+    }
+
+    function renderQuickQuestions(list) {
+        quickWrap.innerHTML = "";
+        (list || []).forEach(function (q) {
+            var btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "ai-quick-btn";
+            btn.innerText = q;
+            btn.addEventListener("click", function () { sendMessage(q); });
+            quickWrap.appendChild(btn);
+        });
+    }
+
+    function showTyping() {
+        var row = document.createElement("div");
+        row.className = "ai-msg-row ai";
+        row.id = "ai-typing-row";
+        row.innerHTML =
+            '<div class="ai-avatar ai">🤖</div>' +
+            '<div><div class="ai-bubble"><span class="text-secondary small me-2">AI đang phân tích dữ liệu...</span>' +
+            '<span class="ai-typing"><span></span><span></span><span></span></span></div></div>';
+        body.appendChild(row);
+        scrollToBottom();
+    }
+
+    function hideTyping() {
+        var row = document.getElementById("ai-typing-row");
+        if (row) { row.remove(); }
+    }
+
+    function sendMessage(text) {
+        var question = (text != null ? text : input.value).trim();
+        if (!question) { return; }
+
+        renderMessage({ sender: "user", message: question, created_at: "" });
+        input.value = "";
+        sendBtn.disabled = true;
+        scrollToBottom();
+        showTyping();
+
+        fetch(API_URL, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": csrfToken,
+            },
+            body: JSON.stringify({ message: question }),
+        })
+            .then(function (res) { return res.json(); })
+            .then(function (payload) {
+                hideTyping();
+                if (!payload.success) {
+                    renderMessage({
+                        sender: "ai",
+                        message: payload.message || "Có lỗi xảy ra, vui lòng thử lại.",
+                        created_at: "",
+                    });
+                    return;
+                }
+                renderMessage(payload);
+                renderQuickQuestions(payload.suggestions && payload.suggestions.length ? payload.suggestions : QUICK_QUESTIONS);
+                scrollToBottom();
+            })
+            .catch(function () {
+                hideTyping();
+                renderMessage({
+                    sender: "ai",
+                    message: "Không thể kết nối tới máy chủ, vui lòng thử lại.",
+                    created_at: "",
+                });
+            })
+            .finally(function () {
+                sendBtn.disabled = false;
+                scrollToBottom();
+            });
+    }
+
+    sendBtn.addEventListener("click", function () { sendMessage(); });
+    input.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") { sendMessage(); }
+    });
+
+    // ---- Khởi tạo giao diện ----
+    var historyEl = document.getElementById("ai-chat-history");
+    var history = historyEl ? JSON.parse(historyEl.textContent) : [];
+
+    if (history.length) {
+        history.forEach(renderMessage);
+        renderQuickQuestions(QUICK_QUESTIONS);
+    } else {
+        renderMessage({
+            sender: "ai",
+            message: "Xin chào Quản lý 👋\n\nTôi là Trợ lý AI Quản lý của KhanhThien SmartPhone.\n\n" +
+                "Tôi có thể giúp bạn theo dõi tình hình cửa hàng, phân tích phiếu sửa chữa, " +
+                "doanh thu, tồn kho linh kiện và đưa ra các cảnh báo, đề xuất dựa trên dữ liệu thực tế.\n\n" +
+                "Bạn muốn kiểm tra vấn đề gì hôm nay?",
+            created_at: "",
+        });
+        renderQuickQuestions(QUICK_QUESTIONS);
+    }
+    scrollToBottom();
+})();
+</script>
+{% endblock %}

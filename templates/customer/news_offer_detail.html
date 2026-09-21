@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container my-4" style="max-width: 800px;">
+    <a href="{% url 'accounts:news_and_offers' %}" class="btn btn-sm btn-outline-secondary rounded-pill mb-3">
+        <i class="bi bi-arrow-left me-1"></i> Quay lại danh sách
+    </a>
+
+    <div class="card border-0 shadow-sm" style="border-radius: 15px;">
+        {% if item.image %}
+            <img src="{{ item.image.url }}" alt="{{ item.title }}" class="card-img-top" style="max-height: 350px; object-fit: cover; border-top-left-radius: 15px; border-top-right-radius: 15px;">
+        {% endif %}
+        <div class="card-body p-4">
+            {% if item.is_offer %}
+                <span class="badge bg-danger mb-2">Ưu đãi Hot</span>
+            {% else %}
+                <span class="badge bg-primary mb-2">Tin công nghệ</span>
+            {% endif %}
+            <h2 class="fw-bold mb-2">{{ item.title }}</h2>
+            <p class="text-secondary small mb-4">Đăng ngày {{ item.created_at|date:"d/m/Y" }}</p>
+            <div>{{ item.content|linebreaks }}</div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Linh kiện - {{ ticket.code }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-3" style="max-width: 800px;">
+  <a href="{% url 'technician_ticket_detail' ticket.id %}" class="text-decoration-none">&larr; Về trang phiếu {{ ticket.code }}</a>
+
+  <h4 class="mt-2 mb-3">📦 Linh kiện đã sử dụng</h4>
+
+  {% if error %}
+  <div class="alert alert-danger">{{ error }}</div>
+  {% endif %}
+
+  <div class="card mb-3">
+    <div class="card-body">
+      <table class="table">
+        <thead>
+          <tr><th>Linh kiện</th><th>SL</th><th>Đơn giá</th><th>Thành tiền</th></tr>
+        </thead>
+        <tbody>
+          {% for used in used_parts %}
+          <tr>
+            <td>{{ used.part.name }}</td>
+            <td>{{ used.quantity }}</td>
+            <td>{{ used.unit_price|floatformat:0 }} đ</td>
+            <td>{{ used.subtotal|floatformat:0 }} đ</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="4" class="text-center text-muted">Chưa dùng linh kiện nào.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <p class="text-end fw-bold mb-0">Tổng tiền linh kiện: {{ ticket.parts_cost|floatformat:0 }} đ</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-body">
+      <h6>Thêm linh kiện</h6>
+      <form method="post" class="row g-2 align-items-end">
+        {% csrf_token %}
+        <div class="col-md-6">
+          <label class="form-label">Linh kiện</label>
+          <select name="part_id" class="form-select" required>
+            <option value="">-- Chọn linh kiện --</option>
+            {% for part in available_parts %}
+            <option value="{{ part.id }}" {% if part.is_low_stock %}class="text-danger"{% endif %}>
+              {{ part.name }} (Tồn: {{ part.stock }} {{ part.unit }} - {{ part.price|floatformat:0 }} đ)
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Số lượng</label>
+          <input type="number" name="quantity" class="form-control" min="1" value="1">
+        </div>
+        <div class="col-md-3">
+          <button type="submit" class="btn btn-primary w-100">➕ Thêm</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

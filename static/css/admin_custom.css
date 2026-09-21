@@ -1,0 +1,847 @@
+/* =========================================================
+   KHANHTHIEN SMARTPHONE - DJANGO JAZZMIN CUSTOM ADMIN
+   ========================================================= */
+
+
+/* =========================================================
+   1. BIẾN GIAO DIỆN
+   ========================================================= */
+
+:root {
+    --kt-primary: #0d6efd;
+    --kt-primary-dark: #0b5ed7;
+    --kt-success: #198754;
+    --kt-warning: #f59f00;
+    --kt-danger: #dc3545;
+    --kt-info: #0dcaf0;
+
+    --kt-sidebar: #1f2937;
+    --kt-sidebar-hover: #374151;
+    --kt-sidebar-active: #4b5563;
+
+    --kt-bg: #f5f7fb;
+    --kt-white: #ffffff;
+    --kt-border: #e5e7eb;
+    --kt-text: #1f2937;
+    --kt-text-light: #6b7280;
+
+    --kt-radius: 12px;
+    --kt-shadow:
+        0 4px 18px rgba(15, 23, 42, 0.06);
+    --kt-shadow-hover:
+        0 8px 25px rgba(15, 23, 42, 0.10);
+}
+
+
+/* =========================================================
+   2. BODY
+   ========================================================= */
+
+body {
+    background: var(--kt-bg) !important;
+    color: var(--kt-text) !important;
+}
+
+
+/* =========================================================
+   3. SIDEBAR
+   ========================================================= */
+
+/* AdminLTE 4 dựng layout bằng CSS Grid, sidebar là một cột của grid.
+   Vì vậy chỉ cần đổi biến --lte-sidebar-width, KHÔNG dùng margin-left
+   kiểu AdminLTE 3 (margin-left sẽ làm lệch toàn bộ trang). */
+
+:root,
+[data-bs-theme="light"],
+[data-bs-theme="dark"] {
+    --lte-sidebar-width: 300px;
+}
+
+.app-sidebar {
+    background: var(--kt-sidebar) !important;
+
+    /* Huỷ position: sticky mặc định của AdminLTE.
+       .app-wrapper đã cao cố định 100vh nên sidebar tự đứng yên rồi,
+       để sticky ở đây sẽ làm khối logo bị đẩy lệch lên và cắt mất. */
+    position: relative !important;
+    top: auto !important;
+
+    height: 100vh !important;
+    max-height: 100vh !important;
+
+    /* Chia dọc: logo ở trên (cố định), menu ở dưới (tự cuộn) */
+    display: flex !important;
+    flex-direction: column !important;
+
+    overflow: hidden !important;
+}
+
+
+/* Khối logo: KHÔNG co lại, luôn hiện đủ.
+   QUAN TRỌNG: bản thân AdminLTE 4 (vendor CSS, không phải file này)
+   khóa cứng .sidebar-brand ở height: 3.5rem (56px) và overflow: hidden
+   — đó là lý do logo luôn bị cắt mất phần trên dù đã canh lề. Ở đây
+   phải ghi đè cả height lẫn overflow thì logo mới hiện đủ. */
+
+.app-sidebar .sidebar-brand {
+    flex: 0 0 auto !important;
+
+    height: auto !important;
+    min-height: 180px !important;
+
+    overflow: visible !important;
+}
+
+
+/* =========================================================
+   4. LOGO / BRAND
+   ========================================================= */
+
+.app-sidebar .sidebar-brand a.brand-link {
+    width: 100% !important;
+
+    min-height: 180px !important;
+    height: auto !important;
+
+    display: flex !important;
+    flex-direction: column !important;
+
+    align-items: center !important;
+    justify-content: center !important;
+
+    /* Đẩy logo xuống thêm, tránh dính sát mép trên cùng */
+    padding: 40px 15px 25px !important;
+    margin: 0 !important;
+
+    overflow: visible !important;
+    white-space: normal !important;
+
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+
+    background: #18212f !important;
+}
+
+
+.app-sidebar .sidebar-brand a.brand-link img.brand-image {
+    float: none !important;
+
+    width: auto !important;
+    height: auto !important;
+
+    max-width: 72px !important;
+    max-height: 72px !important;
+
+    margin: 0 0 14px 0 !important;
+
+    object-fit: contain !important;
+}
+
+
+.app-sidebar .sidebar-brand a.brand-link span.brand-text {
+    display: block !important;
+
+    width: 100% !important;
+
+    color: #ffffff !important;
+
+    font-size: 18px !important;
+    font-weight: 800 !important;
+
+    line-height: 1.35 !important;
+
+    text-align: center !important;
+
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: unset !important;
+
+    letter-spacing: 0.2px;
+}
+
+
+/* =========================================================
+   5. KHU VỰC MENU
+   ========================================================= */
+
+.app-sidebar .sidebar-wrapper {
+    /* Chiếm hết chỗ trống còn lại dưới logo, không cần calc() */
+    flex: 1 1 auto !important;
+
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+
+    margin-top: 0 !important;
+    padding-top: 12px !important;
+
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+}
+
+
+/* Tiêu đề nhóm menu */
+
+.sidebar-menu > .nav-header {
+    color: #9ca3af !important;
+
+    font-size: 12px !important;
+    font-weight: 700 !important;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.8px;
+
+    padding: 16px 20px 8px !important;
+}
+
+
+/* Menu */
+
+aside.app-sidebar .sidebar-menu .nav-link {
+    display: flex !important;
+    align-items: center !important;
+
+    min-height: 48px !important;
+
+    margin: 4px 10px !important;
+    padding: 12px 16px !important;
+
+    border-radius: 10px !important;
+
+    color: #d1d5db !important;
+
+    transition:
+        background 0.2s ease,
+        color 0.2s ease,
+        transform 0.2s ease !important;
+}
+
+
+aside.app-sidebar .sidebar-menu .nav-link p {
+    margin: 0 !important;
+
+    font-size: 15px !important;
+    font-weight: 500 !important;
+}
+
+
+aside.app-sidebar .sidebar-menu .nav-link i {
+    width: 25px !important;
+
+    margin-right: 10px !important;
+
+    font-size: 16px !important;
+
+    text-align: center;
+}
+
+
+/* Hover */
+
+aside.app-sidebar .sidebar-menu .nav-link:hover {
+    background: var(--kt-sidebar-hover) !important;
+
+    color: #ffffff !important;
+
+    transform: translateX(3px);
+}
+
+
+/* Menu đang chọn */
+
+aside.app-sidebar .sidebar-menu .nav-link.active {
+    background: var(--kt-primary) !important;
+
+    color: #ffffff !important;
+
+    box-shadow:
+        0 4px 12px rgba(13, 110, 253, 0.25);
+}
+
+
+/* =========================================================
+   6. HEADER - GHIM CỐ ĐỊNH
+   -----------------------------------------------------------
+   LƯU Ý QUAN TRỌNG:
+   AdminLTE 4 dựng .app-wrapper bằng CSS Grid với
+   grid-template-rows: min-content 1fr min-content.
+   Header nằm ở hàng "min-content" nên ô grid của nó cao đúng
+   bằng chính nó -> position: sticky KHÔNG chạy được.
+
+   Cách xử lý: biến toàn trang thành khung cố định cao 100vh,
+   chỉ cho phần nội dung (.app-main) tự cuộn. Nhờ vậy header
+   (chứa "Trang chủ", "Trợ lý AI Quản lý", "Báo cáo AI") và
+   sidebar luôn đứng yên khi lướt lên/xuống.
+   ========================================================= */
+
+.app-wrapper {
+    height: 100vh !important;
+    min-height: 100vh !important;
+
+    overflow: hidden !important;
+}
+
+
+/* Chỉ vùng nội dung được cuộn */
+
+.app-main {
+    overflow-y: auto !important;
+    overflow-x: auto !important;
+
+    min-height: 0 !important;
+}
+
+
+.app-header {
+    min-height: 64px !important;
+
+    background: #ffffff !important;
+
+    border-bottom: 1px solid var(--kt-border) !important;
+
+    box-shadow:
+        0 2px 8px rgba(15, 23, 42, 0.03) !important;
+
+    z-index: 1050 !important;
+}
+
+
+/* Các link "Trang chủ" / "Trợ lý AI Quản lý" / "Báo cáo AI" */
+
+.app-header .nav-link {
+    color: #4b5563 !important;
+
+    font-weight: 600 !important;
+}
+
+
+.app-header .nav-link:hover {
+    color: var(--kt-primary) !important;
+}
+
+
+/* Thanh tiêu đề + breadcrumb: ghim dính đầu vùng cuộn.
+   Ở đây .app-main mới là khung cuộn nên sticky chạy tốt. */
+
+.app-content-header {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 1030 !important;
+
+    background: var(--kt-bg) !important;
+
+    padding: 16px 0 10px !important;
+
+    border-bottom: 1px solid var(--kt-border) !important;
+}
+
+
+/* =========================================================
+   7. CONTENT
+   ========================================================= */
+
+/* AdminLTE 4: .content-wrapper -> .app-main, .content -> .app-content */
+
+.app-main {
+    background: var(--kt-bg) !important;
+}
+
+
+.app-content {
+    padding: 28px !important;
+}
+
+
+/* =========================================================
+   8. TIÊU ĐỀ TRANG
+   ========================================================= */
+
+.app-content-header h1,
+.app-content-header h3 {
+    color: #111827 !important;
+
+    font-size: 30px !important;
+    font-weight: 800 !important;
+
+    margin: 0 !important;
+}
+
+
+/* Breadcrumb "Trang chủ / Dashboard" ở góc phải tiêu đề */
+
+.app-content-header .breadcrumb {
+    margin-bottom: 0 !important;
+    background: transparent !important;
+    padding: 0 !important;
+}
+
+
+/* Breadcrumb */
+
+.breadcrumb {
+    background: transparent !important;
+
+    padding: 0 !important;
+
+    margin: 8px 0 0 !important;
+}
+
+
+.breadcrumb-item a {
+    color: var(--kt-primary) !important;
+}
+
+
+.breadcrumb-item.active {
+    color: var(--kt-text-light) !important;
+}
+
+
+/* =========================================================
+   9. CARD
+   ========================================================= */
+
+.card {
+    border: 1px solid var(--kt-border) !important;
+
+    border-radius: var(--kt-radius) !important;
+
+    background: var(--kt-white) !important;
+
+    box-shadow: var(--kt-shadow) !important;
+
+    overflow: hidden !important;
+
+    transition:
+        box-shadow 0.25s ease,
+        transform 0.25s ease !important;
+}
+
+
+.card:hover {
+    box-shadow: var(--kt-shadow-hover) !important;
+}
+
+
+.card-header {
+    background: #ffffff !important;
+
+    border-bottom: 1px solid var(--kt-border) !important;
+
+    padding: 18px 20px !important;
+}
+
+
+.card-title {
+    margin: 0 !important;
+
+    font-size: 18px !important;
+
+    font-weight: 700 !important;
+
+    color: #111827 !important;
+}
+
+
+.card-body {
+    padding: 20px !important;
+}
+
+
+/* =========================================================
+   10. DASHBOARD BOX
+   ========================================================= */
+
+.small-box,
+.info-box {
+    border-radius: var(--kt-radius) !important;
+
+    border: 1px solid var(--kt-border) !important;
+
+    box-shadow: var(--kt-shadow) !important;
+
+    overflow: hidden !important;
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease !important;
+}
+
+
+.small-box:hover,
+.info-box:hover {
+    transform: translateY(-3px);
+
+    box-shadow: var(--kt-shadow-hover) !important;
+}
+
+
+/* =========================================================
+   11. BẢNG DỮ LIỆU
+   ========================================================= */
+
+.table {
+    margin-bottom: 0 !important;
+
+    background: #ffffff !important;
+}
+
+
+.table thead th {
+    background: #f8fafc !important;
+
+    color: #374151 !important;
+
+    font-size: 13px !important;
+
+    font-weight: 700 !important;
+
+    border-bottom: 1px solid var(--kt-border) !important;
+
+    padding: 14px 12px !important;
+
+    vertical-align: middle !important;
+}
+
+
+.table tbody td {
+    padding: 13px 12px !important;
+
+    color: #4b5563 !important;
+
+    border-top: 1px solid #f0f2f5 !important;
+
+    vertical-align: middle !important;
+}
+
+
+.table tbody tr {
+    transition: background 0.2s ease !important;
+}
+
+
+.table tbody tr:hover {
+    background: #f8fbff !important;
+}
+
+
+/* =========================================================
+   12. BUTTON
+   ========================================================= */
+
+.btn {
+    border-radius: 8px !important;
+
+    font-weight: 600 !important;
+
+    padding: 8px 14px !important;
+
+    transition:
+        transform 0.15s ease,
+        box-shadow 0.15s ease !important;
+}
+
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+
+/* Primary */
+
+.btn-primary {
+    background: var(--kt-primary) !important;
+
+    border-color: var(--kt-primary) !important;
+}
+
+
+.btn-primary:hover {
+    background: var(--kt-primary-dark) !important;
+
+    border-color: var(--kt-primary-dark) !important;
+}
+
+
+/* Success */
+
+.btn-success {
+    background: var(--kt-success) !important;
+
+    border-color: var(--kt-success) !important;
+}
+
+
+/* Danger */
+
+.btn-danger {
+    background: var(--kt-danger) !important;
+
+    border-color: var(--kt-danger) !important;
+}
+
+
+/* Warning */
+
+.btn-warning {
+    color: #ffffff !important;
+}
+
+
+/* =========================================================
+   13. FORM
+   ========================================================= */
+
+.form-control,
+.form-select {
+    border: 1px solid #d7dce3 !important;
+
+    border-radius: 8px !important;
+
+    min-height: 42px !important;
+
+    padding: 8px 12px !important;
+
+    box-shadow: none !important;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease !important;
+}
+
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--kt-primary) !important;
+
+    box-shadow:
+        0 0 0 3px rgba(13, 110, 253, 0.12) !important;
+}
+
+
+/* =========================================================
+   14. BADGE
+   ========================================================= */
+
+.badge {
+    border-radius: 999px !important;
+
+    padding: 6px 10px !important;
+
+    font-weight: 600 !important;
+}
+
+
+/* =========================================================
+   15. PAGINATION
+   ========================================================= */
+
+.pagination .page-link {
+    border-radius: 7px !important;
+
+    margin: 0 2px !important;
+
+    border: 1px solid var(--kt-border) !important;
+
+    color: #374151 !important;
+}
+
+
+.pagination .page-item.active .page-link {
+    background: var(--kt-primary) !important;
+
+    border-color: var(--kt-primary) !important;
+
+    color: #ffffff !important;
+}
+
+
+/* =========================================================
+   16. SEARCH
+   ========================================================= */
+
+#searchbar {
+    border-radius: 8px !important;
+
+    border: 1px solid #d7dce3 !important;
+}
+
+
+/* =========================================================
+   17. FOOTER
+   ========================================================= */
+
+.app-footer {
+    background: #ffffff !important;
+
+    border-top: 1px solid var(--kt-border) !important;
+
+    color: #6b7280 !important;
+
+    padding: 16px 25px !important;
+}
+
+
+/* =========================================================
+   18. LOGIN
+   ========================================================= */
+
+.login-logo img {
+    max-width: 150px !important;
+
+    max-height: 150px !important;
+
+    width: auto !important;
+
+    height: auto !important;
+
+    object-fit: contain !important;
+}
+
+
+/* =========================================================
+   19. ẨN LOGO THỪA Ở LOGIN
+   ========================================================= */
+
+.login-logo img:nth-of-type(2),
+.login-logo img:nth-child(2) {
+    display: none !important;
+}
+
+
+/* =========================================================
+   20. RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 991.98px) {
+
+    :root,
+    [data-bs-theme="light"],
+    [data-bs-theme="dark"] {
+        --lte-sidebar-width: 250px;
+    }
+
+    .app-sidebar .sidebar-brand {
+        min-height: 140px !important;
+    }
+
+    .app-sidebar .sidebar-brand a.brand-link {
+        min-height: 140px !important;
+    }
+
+    .app-content {
+        padding: 20px !important;
+    }
+
+    /* Header vẫn ghim, nhưng tiêu đề trang thôi ghim cho đỡ chiếm chỗ */
+    .app-content-header {
+        position: static !important;
+    }
+}
+
+
+@media (max-width: 767.98px) {
+
+    :root,
+    [data-bs-theme="light"],
+    [data-bs-theme="dark"] {
+        --lte-sidebar-width: 230px;
+    }
+
+    .app-sidebar .sidebar-brand {
+        min-height: 120px !important;
+    }
+
+    .app-sidebar .sidebar-brand a.brand-link {
+        min-height: 120px !important;
+    }
+
+    .app-sidebar {
+        height: auto !important;
+        max-height: none !important;
+    }
+
+    .app-content {
+        padding: 15px !important;
+    }
+
+    .app-content-header h1,
+    .app-content-header h3 {
+        font-size: 24px !important;
+    }
+
+    /* Trên điện thoại: trả về cuộn bình thường của trình duyệt.
+       Thanh 100vh cố định hay bị hụt/nhảy do thanh địa chỉ di động. */
+    .app-wrapper {
+        height: auto !important;
+        min-height: 100vh !important;
+
+        overflow: visible !important;
+    }
+
+    .app-main {
+        overflow: visible !important;
+    }
+
+    /* Header chuyển sang dán cố định trên cùng màn hình */
+    .app-header {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+    }
+
+    .app-main {
+        padding-top: 64px !important;
+    }
+
+    .app-content-header {
+        position: static !important;
+    }
+}
+
+
+/* =========================================================
+   21. MÀN HÌNH THẤP
+   Laptop 13-14" hay màn 768px chiều cao: thu nhỏ khối logo
+   để menu bên dưới còn đủ chỗ hiển thị.
+   ========================================================= */
+
+@media (max-height: 800px) {
+
+    .app-sidebar .sidebar-brand a.brand-link {
+        min-height: 130px !important;
+        padding: 26px 15px 16px !important;
+    }
+
+    .app-sidebar .sidebar-brand a.brand-link img.brand-image {
+        max-width: 54px !important;
+        max-height: 54px !important;
+
+        margin-bottom: 10px !important;
+    }
+
+    .app-sidebar .sidebar-brand a.brand-link span.brand-text {
+        font-size: 16px !important;
+    }
+}
+
+
+@media (max-height: 650px) {
+
+    .app-sidebar .sidebar-brand a.brand-link {
+        min-height: 100px !important;
+        padding: 20px 15px 12px !important;
+    }
+
+    .app-sidebar .sidebar-brand a.brand-link img.brand-image {
+        max-width: 40px !important;
+        max-height: 40px !important;
+
+        margin-bottom: 6px !important;
+    }
+
+    .app-sidebar .sidebar-brand a.brand-link span.brand-text {
+        font-size: 14px !important;
+    }
+}

@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block title %}
+{{ notification.title }}
+{% endblock %}
+
+{% block content %}
+
+<div class="container py-4" style="max-width: 900px;">
+
+    <a
+    href="/account/dashboard/"
+    class="text-decoration-none"
+>
+    &larr; Về trang chủ
+    </a>
+
+    <div class="card mt-3 shadow-sm border-0">
+
+        <div class="card-body p-4">
+
+            <div class="d-flex align-items-start gap-3">
+
+                <div
+                    class="rounded-circle bg-primary text-white
+                           d-flex align-items-center justify-content-center"
+                    style="
+                        width: 45px;
+                        height: 45px;
+                        flex-shrink: 0;
+                    "
+                >
+                    🔔
+                </div>
+
+                <div class="flex-grow-1">
+
+                    <h4 class="mb-1">
+                        {{ notification.title }}
+                    </h4>
+
+                    <small class="text-muted">
+                        {{ notification.created_at|date:"d/m/Y H:i" }}
+                    </small>
+
+                </div>
+
+            </div>
+
+            <hr class="my-4">
+
+            <div
+                style="
+                    white-space: pre-line;
+                    line-height: 1.8;
+                    font-size: 16px;
+                "
+            >
+                {{ notification.message }}
+            </div>
+
+
+            {% if notification.ticket %}
+
+                <div class="card mt-4 border">
+
+                    <div class="card-body">
+
+                        <h6 class="fw-bold mb-3">
+                            📱 Thông tin phiếu sửa chữa
+                        </h6>
+
+                        <div class="row g-3">
+
+                            <div class="col-md-6">
+
+                                <div class="text-muted small">
+                                    Mã phiếu
+                                </div>
+
+                                <div class="fw-bold">
+                                    {{ notification.ticket.code }}
+                                </div>
+
+                            </div>
+
+
+                            <div class="col-md-6">
+
+                                <div class="text-muted small">
+                                    Trạng thái
+                                </div>
+
+                                <div class="fw-bold">
+                                    {{ notification.ticket.get_status_display }}
+                                </div>
+
+                            </div>
+
+
+                            {% if notification.ticket.device %}
+
+                                <div class="col-md-6">
+
+                                    <div class="text-muted small">
+                                        Thiết bị
+                                    </div>
+
+                                    <div class="fw-bold">
+                                        {{ notification.ticket.device.brand }}
+                                        {{ notification.ticket.device.model_name }}
+                                    </div>
+
+                                </div>
+
+                            {% endif %}
+
+                        </div>
+
+
+                        <div class="mt-4">
+
+                            <a
+                                href="{% url 'repair_progress' %}"
+                                class="btn btn-primary"
+                            >
+                                🔧 Theo dõi sửa chữa
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

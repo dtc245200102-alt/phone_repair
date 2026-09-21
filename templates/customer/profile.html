@@ -1,0 +1,357 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+    .profile-page {
+        max-width: 1100px;
+        margin: 0 auto;
+    }
+
+    .profile-header {
+        background: linear-gradient(135deg, #007aff, #0055cc);
+        color: white;
+        border-radius: 24px;
+        padding: 35px;
+        margin-bottom: 25px;
+    }
+
+    .avatar-large {
+        width: 110px;
+        height: 110px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 4px solid white;
+        background: #f1f1f1;
+    }
+
+    .avatar-default {
+        width: 110px;
+        height: 110px;
+        border-radius: 50%;
+        background: white;
+        color: #007aff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 55px;
+        border: 4px solid white;
+    }
+
+    .profile-card {
+        background: white;
+        border-radius: 20px;
+        padding: 25px;
+        margin-bottom: 25px;
+        box-shadow: 0 4px 20px rgba(0,0,0,.06);
+    }
+
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 0;
+        border-bottom: 1px solid #eee;
+    }
+
+    .info-row:last-child {
+        border-bottom: none;
+    }
+
+    .info-label {
+        color: #777;
+    }
+
+    .info-value {
+        font-weight: 600;
+        text-align: right;
+    }
+
+    .locked {
+        color: #777;
+    }
+
+    .history-card {
+        border: 1px solid #eee;
+        border-radius: 15px;
+        padding: 20px;
+        height: 100%;
+        transition: .2s;
+    }
+
+    .history-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 20px rgba(0,0,0,.08);
+    }
+
+    .history-icon {
+        font-size: 32px;
+        margin-bottom: 12px;
+    }
+</style>
+
+<div class="profile-page">
+
+    <!-- HEADER -->
+    <div class="profile-header">
+
+        <div class="d-flex align-items-center gap-4">
+
+            {% if profile_user.avatar %}
+                <img
+                    src="{{ profile_user.avatar.url }}"
+                    class="avatar-large"
+                    alt="Avatar"
+                >
+            {% else %}
+                <div class="avatar-default">
+                    <i class="bi bi-person"></i>
+                </div>
+            {% endif %}
+
+            <div>
+                <h2 class="mb-1">
+                    {{ profile_user.get_full_name|default:profile_user.username }}
+                </h2>
+
+                <div class="opacity-75">
+                    <i class="bi bi-person-badge me-1"></i>
+                    {{ profile_user.get_role_display }}
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- THÔNG TIN TÀI KHOẢN -->
+    <div class="profile-card">
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+
+            <h4 class="mb-0">
+                <i class="bi bi-person-vcard me-2"></i>
+                Thông tin cá nhân
+            </h4>
+
+            <a
+                href="{% url 'accounts:customer_profile_edit' %}"
+                class="btn btn-primary rounded-pill px-4"
+            >
+                <i class="bi bi-pencil me-1"></i>
+                Chỉnh sửa
+            </a>
+
+        </div>
+
+
+        <div class="info-row">
+            <span class="info-label">
+                Tên đăng nhập
+            </span>
+
+            <span class="info-value">
+                {{ profile_user.username }}
+                <i
+                    class="bi bi-lock-fill text-secondary ms-1"
+                    title="Không thể thay đổi"
+                ></i>
+            </span>
+        </div>
+
+
+        <div class="info-row">
+            <span class="info-label">
+                Email
+            </span>
+
+            <span class="info-value locked">
+                {{ profile_user.email|default:"Chưa cập nhật" }}
+
+                <i
+                    class="bi bi-lock-fill ms-1"
+                    title="Email đăng ký không thể thay đổi"
+                ></i>
+            </span>
+        </div>
+
+
+        <div class="info-row">
+            <span class="info-label">
+                Số điện thoại
+            </span>
+
+            <span class="info-value locked">
+                {{ profile_user.phone_number|default:"Chưa cập nhật" }}
+
+                <i
+                    class="bi bi-lock-fill ms-1"
+                    title="Số điện thoại đăng ký không thể thay đổi"
+                ></i>
+            </span>
+        </div>
+
+
+        <div class="info-row">
+            <span class="info-label">
+                Họ và tên
+            </span>
+
+            <span class="info-value">
+                {{ profile_user.get_full_name|default:"Chưa cập nhật" }}
+            </span>
+        </div>
+
+
+        <div class="info-row">
+            <span class="info-label">
+                Ngày sinh
+            </span>
+
+            <span class="info-value">
+                {% if profile_user.date_of_birth %}
+                    {{ profile_user.date_of_birth|date:"d/m/Y" }}
+                {% else %}
+                    Chưa cập nhật
+                {% endif %}
+            </span>
+        </div>
+
+
+        <div class="info-row">
+            <span class="info-label">
+                Loại tài khoản
+            </span>
+
+            <span class="badge bg-primary-subtle text-primary rounded-pill px-3 py-2">
+                {{ profile_user.get_role_display }}
+            </span>
+        </div>
+
+    </div>
+
+
+    <!-- LỊCH SỬ -->
+    <div class="profile-card">
+
+        <h4 class="mb-4">
+            <i class="bi bi-clock-history me-2"></i>
+            Lịch sử của bạn
+        </h4>
+
+        <div class="row g-4">
+
+            <!-- MUA HÀNG -->
+            <div class="col-md-4">
+
+                <div class="history-card">
+
+                    <div class="history-icon text-primary">
+                        <i class="bi bi-bag-check"></i>
+                    </div>
+
+                    <h5>
+                        Lịch sử mua hàng
+                    </h5>
+
+                    {% if purchase_history %}
+                        <p>
+                            Bạn có {{ purchase_history|length }} đơn hàng.
+                        </p>
+                    {% else %}
+                        <p class="text-muted">
+                            Chưa có lịch sử mua hàng.
+                        </p>
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+            <!-- BẢO HÀNH -->
+            <div class="col-md-4">
+
+                <div class="history-card">
+
+                    <div class="history-icon text-warning">
+                        <i class="bi bi-shield-check"></i>
+                    </div>
+
+                    <h5>
+                        Lịch sử bảo hành
+                    </h5>
+
+                    {% if warranty_history %}
+                        <p>
+                            Bạn có {{ warranty_history|length }} sản phẩm bảo hành.
+                        </p>
+                    {% else %}
+                        <p class="text-muted">
+                            Chưa có lịch sử bảo hành.
+                        </p>
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+            <!-- SỬA CHỮA -->
+            <div class="col-md-4">
+
+                <div class="history-card">
+
+                    <div class="history-icon text-success">
+                        <i class="bi bi-tools"></i>
+                    </div>
+
+                    <h5>
+                        Lịch sử sửa chữa
+                    </h5>
+
+                    {% if repair_history %}
+                        <p>
+                            Bạn có {{ repair_history|length }} phiếu sửa chữa.
+                        </p>
+                    {% else %}
+                        <p class="text-muted">
+                            Chưa có lịch sử sửa chữa.
+                        </p>
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- XÓA TÀI KHOẢN -->
+    <div class="profile-card border border-danger">
+
+        <h5 class="text-danger">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            Xóa tài khoản
+        </h5>
+
+        <p class="text-muted">
+            Xóa tài khoản sẽ xóa thông tin đăng nhập của bạn.
+            Thao tác này không thể hoàn tác.
+        </p>
+
+        <a
+            href="{% url 'accounts:customer_delete_account' %}"
+            class="btn btn-outline-danger rounded-pill"
+        >
+            Xóa tài khoản
+        </a>
+
+    </div>
+
+</div>
+
+{% endblock %}

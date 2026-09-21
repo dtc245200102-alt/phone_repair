@@ -1,0 +1,456 @@
+{% extends "base.html" %}
+
+{% block title %}
+Bảng điều khiển khách hàng · KhanhThien SmartPhone
+{% endblock %}
+
+{% block content %}
+
+<!-- HERO -->
+
+<div class="kt-hero mb-4">
+
+    <div class="row align-items-center g-4 position-relative">
+
+        <div class="col-lg-8">
+
+            <span class="kt-eyebrow mb-3">
+
+                <i class="bi bi-person-circle"></i>
+
+                Cổng khách hàng
+
+            </span>
+
+            <h1 class="kt-page-title display-6 mb-2">
+
+                Xin chào,
+                {{ user.get_full_name|default:user.username }}!
+
+            </h1>
+
+            <p class="lead mb-3">
+
+                Quản lý thiết bị, sửa chữa và bảo hành
+                của bạn trong một nơi.
+
+            </p>
+
+            <p class="text-secondary mb-4">
+
+                Theo dõi tiến độ, đặt lịch sửa chữa
+                và nhận hỗ trợ từ Trợ lý AI
+                của KhanhThien SmartPhone.
+
+            </p>
+
+
+            <div class="d-flex flex-wrap gap-2">
+
+                <a
+                    href="{% url 'ai_diagnose' %}"
+                    class="btn btn-primary px-4"
+                >
+
+                    <i class="bi bi-stars me-1"></i>
+
+                    Chẩn đoán với AI
+
+                </a>
+
+
+                <a
+                    href="{% url 'booking' %}"
+                    class="btn btn-light px-4"
+                >
+
+                    <i class="bi bi-calendar-plus me-1"></i>
+
+                    Đặt lịch sửa chữa
+
+                </a>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-lg-4 d-none d-lg-flex justify-content-center">
+
+            <div
+                class="text-primary opacity-75"
+                style="
+                    font-size:8rem;
+                    line-height:1;
+                "
+            >
+
+                <i class="bi bi-phone"></i>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- FEATURES -->
+
+<div class="row g-4">
+
+    <!-- CARD -->
+
+    <div class="col-md-6 col-lg-3">
+
+        <div class="card kt-feature-card h-100 border-0 p-2">
+
+            <div class="card-body d-flex flex-column">
+
+                <div class="feature-icon">
+
+                    <i class="bi bi-tools"></i>
+
+                </div>
+
+                <h5 class="fw-bold">
+
+                    Tiến độ sửa chữa
+
+                </h5>
+
+                <p class="text-secondary small mb-4">
+
+                    Theo dõi trạng thái thiết bị,
+                    kỹ thuật viên và cập nhật mới nhất.
+
+                </p>
+
+                <a
+                    href="{% url 'repair_progress' %}"
+                    class="btn btn-outline-primary mt-auto"
+                >
+
+                    Tra cứu tiến độ
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- AI -->
+
+    <div class="col-md-6 col-lg-3">
+
+        <div class="card kt-feature-card h-100 border-0 p-2">
+
+            <div class="card-body d-flex flex-column">
+
+                <div class="feature-icon bg-info-subtle text-info">
+
+                    <i class="bi bi-cpu-fill"></i>
+
+                </div>
+
+                <h5 class="fw-bold">
+
+                    Trợ lý AI
+
+                </h5>
+
+                <p class="text-secondary small mb-4">
+
+                    Mô tả tình trạng máy để AI
+                    hỗ trợ phân tích nguyên nhân
+                    và hướng xử lý.
+
+                </p>
+
+                <a
+                    href="{% url 'ai_diagnose' %}"
+                    class="btn btn-outline-primary mt-auto"
+                >
+
+                    Chẩn đoán ngay
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- BOOKING -->
+
+    <div class="col-md-6 col-lg-3">
+
+        <div class="card kt-feature-card h-100 border-0 p-2">
+
+            <div class="card-body d-flex flex-column">
+
+                <div class="feature-icon bg-success-subtle text-success">
+
+                    <i class="bi bi-calendar-check-fill"></i>
+
+                </div>
+
+                <h5 class="fw-bold">
+
+                    Đặt lịch sửa chữa
+
+                </h5>
+
+                <p class="text-secondary small mb-4">
+
+                    Gửi trước thông tin thiết bị và lỗi
+                    để trung tâm chuẩn bị tiếp nhận.
+
+                </p>
+
+                <a
+                    href="{% url 'booking' %}"
+                    class="btn btn-outline-success mt-auto"
+                >
+
+                    Đặt lịch ngay
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- WARRANTY -->
+
+    <div class="col-md-6 col-lg-3">
+
+        <div class="card kt-feature-card h-100 border-0 p-2">
+
+            <div class="card-body d-flex flex-column">
+
+                <div class="feature-icon bg-warning-subtle text-warning">
+
+                    <i class="bi bi-shield-check"></i>
+
+                </div>
+
+                <h5 class="fw-bold">
+
+                    Tra cứu bảo hành
+
+                </h5>
+
+                <p class="text-secondary small mb-4">
+
+                    Kiểm tra thời hạn và thông tin
+                    bảo hành nhanh bằng IMEI
+                    hoặc số điện thoại.
+
+                </p>
+
+                <a
+                    href="{% url 'accounts:warranty_check' %}"
+                    class="btn btn-outline-primary mt-auto"
+                >
+
+                    Kiểm tra bảo hành
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- LOWER -->
+
+<div class="row g-4 mt-1">
+
+    <div class="col-lg-8">
+
+        <div class="card border-0 p-4 h-100">
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+
+                <div>
+
+                    <h5 class="fw-bold mb-1">
+
+                        Trải nghiệm dịch vụ
+
+                    </h5>
+
+                    <p class="text-secondary small mb-0">
+
+                        Các lối tắt thường dùng cho tài khoản của bạn.
+
+                    </p>
+
+                </div>
+
+                <span class="badge bg-primary-subtle text-primary">
+
+                    Smart Service
+
+                </span>
+
+            </div>
+
+
+            <div class="row g-3">
+
+                <div class="col-md-4">
+
+                    <a
+                        href="{% url 'accounts:customer_profile' %}"
+                        class="text-decoration-none"
+                    >
+
+                        <div class="border rounded-4 p-3 h-100">
+
+                            <i class="bi bi-person-badge text-primary fs-4"></i>
+
+                            <div class="fw-bold mt-2 text-dark">
+
+                                Hồ sơ cá nhân
+
+                            </div>
+
+                            <small class="text-secondary">
+
+                                Thông tin & avatar
+
+                            </small>
+
+                        </div>
+
+                    </a>
+
+                </div>
+
+
+                <div class="col-md-4">
+
+                    <a
+                        href="{% url 'accounts:store' %}"
+                        class="text-decoration-none"
+                    >
+
+                        <div class="border rounded-4 p-3 h-100">
+
+                            <i class="bi bi-shop text-primary fs-4"></i>
+
+                            <div class="fw-bold mt-2 text-dark">
+
+                                Cửa hàng
+
+                            </div>
+
+                            <small class="text-secondary">
+
+                                Sản phẩm & dịch vụ
+
+                            </small>
+
+                        </div>
+
+                    </a>
+
+                </div>
+
+
+                <div class="col-md-4">
+
+                    <a
+                        href="{% url 'accounts:news_and_offers' %}"
+                        class="text-decoration-none"
+                    >
+
+                        <div class="border rounded-4 p-3 h-100">
+
+                            <i class="bi bi-newspaper text-primary fs-4"></i>
+
+                            <div class="fw-bold mt-2 text-dark">
+
+                                Tin tức & ưu đãi
+
+                            </div>
+
+                            <small class="text-secondary">
+
+                                Cập nhật mới nhất
+
+                            </small>
+
+                        </div>
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="col-lg-4">
+
+        <div
+            class="card border-0 p-4 h-100"
+            style="background:#eff6ff;"
+        >
+
+            <span class="text-primary fw-bold small">
+
+                HỖ TRỢ NHANH
+
+            </span>
+
+            <h5 class="fw-bold mt-2">
+
+                Cần kiểm tra thiết bị?
+
+            </h5>
+
+            <p class="text-secondary small">
+
+                Mô tả vấn đề để trợ lý AI
+                gợi ý hướng xử lý trước khi
+                bạn mang máy tới trung tâm.
+
+            </p>
+
+            <a
+                href="{% url 'ai_diagnose' %}"
+                class="btn btn-primary mt-auto"
+            >
+
+                Mở Trợ lý AI
+
+                <i class="bi bi-arrow-right ms-1"></i>
+
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

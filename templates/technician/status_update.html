@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Cập nhật trạng thái - {{ ticket.code }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-3" style="max-width: 700px;">
+  <a href="{% url 'technician_ticket_detail' ticket.id %}" class="text-decoration-none">&larr; Về trang phiếu {{ ticket.code }}</a>
+
+  <h4 class="mt-2 mb-3">📝 Cập nhật trạng thái & phí công</h4>
+
+  {% if error %}
+  <div class="alert alert-danger">{{ error }}</div>
+  {% endif %}
+
+  <div class="card">
+    <div class="card-body">
+      <p class="mb-2">Trạng thái hiện tại: <span class="badge bg-{{ ticket.status_badge_class }}">{{ ticket.get_status_display }}</span></p>
+
+      <form method="post">
+        {% csrf_token %}
+
+        <div class="mb-3">
+          <label class="form-label">Trạng thái mới</label>
+          <select name="status" class="form-select">
+            {% for value, label in status_choices %}
+            <option value="{{ value }}" {% if value == ticket.status %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Ghi chú kỹ thuật</label>
+          <textarea name="notes" class="form-control" rows="4">{{ ticket.notes }}</textarea>
+          <small class="text-muted">Khách hàng KHÔNG thấy ghi chú này trực tiếp — dùng mục "AI soạn tin nhắn tiến độ" để tạo nội dung gửi khách.</small>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Phí công / phí dự kiến (VNĐ)</label>
+          <input type="number" step="1000" min="0" name="estimated_cost" class="form-control" value="{{ ticket.estimated_cost|floatformat:0 }}">
+          <small class="text-muted">Chưa gồm tiền linh kiện — tiền linh kiện cộng tự động ở mục "Linh kiện đã sử dụng".</small>
+        </div>
+
+        <button type="submit" class="btn btn-primary">💾 Lưu cập nhật</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

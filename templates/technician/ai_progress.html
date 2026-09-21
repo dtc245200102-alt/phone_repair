@@ -1,0 +1,267 @@
+{% extends "base.html" %}
+
+{% block title %}
+AI tin nhắn tiến độ - {{ ticket.code }}
+{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid py-3" style="max-width: 800px;">
+
+    <a
+        href="{% url 'technician_ticket_detail' ticket.id %}"
+        class="text-decoration-none"
+    >
+        &larr; Về trang phiếu {{ ticket.code }}
+    </a>
+
+    <h4 class="mt-2 mb-3">
+        💬 AI soạn tin nhắn tiến độ cho khách
+    </h4>
+
+    <p class="text-muted">
+        AI dựa trên trạng thái sửa chữa, mô tả lỗi,
+        ghi chú kỹ thuật và bản tóm tắt AI để tạo tin nhắn.
+        Kỹ thuật viên có thể sửa nội dung trước khi lưu hoặc gửi.
+    </p>
+
+    {% if error %}
+        <div class="alert alert-danger">
+            {{ error }}
+        </div>
+    {% endif %}
+
+
+    <!-- ====================================== -->
+    <!-- BẢN NHÁP AI VỪA SINH -->
+    <!-- ====================================== -->
+
+    {% if draft_message is not None %}
+
+        <div class="card mb-3 border-success">
+
+            <div class="card-body">
+
+                <h6>
+                    📝 Bản nháp AI
+                </h6>
+
+                <p class="text-muted small">
+                    Đây là bản nháp chưa được gửi.
+                    Bạn có thể chỉnh sửa trước khi lưu.
+                </p>
+
+                <form method="post">
+
+                    {% csrf_token %}
+
+                    <textarea
+                        name="message"
+                        class="form-control mb-3"
+                        rows="8"
+                        maxlength="5000"
+                        required
+                    >{{ draft_message }}</textarea>
+
+
+                    <div class="d-flex flex-wrap gap-2">
+
+                        <!-- LƯU -->
+                        <button
+                            type="submit"
+                            name="action"
+                            value="save"
+                            class="btn btn-outline-secondary"
+                        >
+                            💾 Lưu thay đổi
+                        </button>
+
+
+                        <!-- KHÁCH -->
+                        <button
+                            type="submit"
+                            name="action"
+                            value="send_customer"
+                            class="btn btn-success"
+                        >
+                            🔔 Lưu & thông báo khách hàng
+                        </button>
+
+
+                        <!-- ADMIN -->
+                        <button
+                            type="submit"
+                            name="action"
+                            value="send_admin"
+                            class="btn btn-primary"
+                        >
+                            📤 Lưu & thông báo Admin
+                        </button>
+
+
+                        <!-- KHÁCH + ADMIN -->
+                        <button
+                            type="submit"
+                            name="action"
+                            value="send_all"
+                            class="btn btn-dark"
+                        >
+                            📤 Lưu & gửi khách + Admin
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+
+    <!-- ====================================== -->
+    <!-- ĐÃ CÓ TIN NHẮN TRONG DATABASE -->
+    <!-- ====================================== -->
+
+    {% elif ticket.ai_progress_message %}
+
+        <div class="card mb-3 border-success">
+
+            <div class="card-body">
+
+                <h6>
+                    💾 Tin nhắn đã lưu
+                </h6>
+
+                <p class="text-muted small">
+                    Bạn có thể chỉnh sửa trực tiếp nội dung
+                    rồi lưu hoặc gửi lại.
+                </p>
+
+                <form method="post">
+
+                    {% csrf_token %}
+
+                    <textarea
+                        name="message"
+                        class="form-control mb-3"
+                        rows="8"
+                        maxlength="5000"
+                        required
+                    >{{ ticket.ai_progress_message }}</textarea>
+
+
+                    <div class="d-flex flex-wrap gap-2">
+
+                        <!-- LƯU -->
+                        <button
+                            type="submit"
+                            name="action"
+                            value="save"
+                            class="btn btn-outline-secondary"
+                        >
+                            💾 Lưu thay đổi
+                        </button>
+
+
+                        <!-- KHÁCH -->
+                        <button
+                            type="submit"
+                            name="action"
+                            value="send_customer"
+                            class="btn btn-success"
+                        >
+                            🔔 Lưu & thông báo khách hàng
+                        </button>
+
+
+                        <!-- ADMIN -->
+                        <button
+                            type="submit"
+                            name="action"
+                            value="send_admin"
+                            class="btn btn-primary"
+                        >
+                            📤 Lưu & thông báo Admin
+                        </button>
+
+
+                        <!-- KHÁCH + ADMIN -->
+                        <button
+                            type="submit"
+                            name="action"
+                            value="send_all"
+                            class="btn btn-dark"
+                        >
+                            📤 Lưu & gửi khách + Admin
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+
+    <!-- ====================================== -->
+    <!-- CHƯA CÓ TIN NHẮN -->
+    <!-- ====================================== -->
+
+    {% else %}
+
+        <div class="card mb-3">
+
+            <div class="card-body">
+
+                <h6>
+                    Tin nhắn hiện tại
+                </h6>
+
+                <p class="text-muted fst-italic mb-0">
+                    Chưa có tin nhắn tiến độ nào được lưu.
+                </p>
+
+            </div>
+
+        </div>
+
+    {% endif %}
+
+
+    <!-- ====================================== -->
+    <!-- NÚT GEMINI -->
+    <!-- ====================================== -->
+
+        <form
+        method="post"
+        onsubmit="
+            const b = this.querySelector('button');
+            setTimeout(function () {
+                b.disabled = true;
+                b.innerHTML = '⏳ Gemini đang tạo...';
+            }, 0);
+        "
+    >
+
+        {% csrf_token %}
+
+        <button
+            type="submit"
+            name="action"
+            value="generate"
+            class="btn btn-success"
+        >
+            🔄
+            {% if ticket.ai_progress_message %}
+                Tạo lại bản nháp bằng AI
+            {% else %}
+                Tạo tin nhắn bằng AI
+            {% endif %}
+        </button>
+
+    </form>
+
+</div>
+
+{% endblock %}

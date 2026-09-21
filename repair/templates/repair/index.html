@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="row justify-content-center my-4">
+    <div class="col-lg-8">
+
+        <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+
+            <div class="card-body p-4 p-md-5">
+
+                <!-- Header -->
+                <div class="text-center mb-4">
+
+                    <div class="text-primary mb-3">
+                        <i class="bi bi-cpu-fill display-4"></i>
+                    </div>
+
+                    <h2 class="fw-bold mt-2">
+                        Trợ lý AI chẩn đoán sự cố
+                    </h2>
+
+                    <p class="text-secondary">
+                        Mô tả tình trạng thiết bị để nhận
+                        phân tích nguyên nhân và phương án xử lý.
+                    </p>
+
+                </div>
+
+
+                <!-- KHUNG CHAT AI -->
+                <div style="max-width: 100%; margin: 20px auto; border: 1px solid #ddd; border-radius: 15px; display: flex; flex-direction: column; height: 500px; background-color: #ffffff; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+    
+                    <!-- Lịch sử tin nhắn -->
+                    <div id="chat-history" style="flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; background: #f0f2f5; border-top-left-radius: 15px; border-top-right-radius: 15px;">
+                       <div style="align-self: flex-start; background: #e4e6eb; color: #050505; padding: 12px 18px; border-radius: 18px; max-width: 80%; line-height: 1.4;">
+                            Chào bạn! Tôi là trợ lý AI của KhanhThien SmartPhone. Bạn đang gặp sự cố gì với điện thoại vậy?
+                       </div>
+                    </div>
+
+                    <!-- Khu vực nhập tin -->
+                    <div style="display: flex; padding: 15px; border-top: 1px solid #ddd; background: #fff; border-bottom-left-radius: 15px; border-bottom-right-radius: 15px;">
+                        <input type="text" id="user-input" placeholder="Nhập tình trạng máy (VD: Rơi vỡ màn hình)..." style="flex: 1; padding: 12px 20px; border: 1px solid #ccc; border-radius: 25px; outline: none; margin-right: 10px; font-size: 15px;">
+                        <button onclick="sendMessage()" style="background: #0d6efd; color: white; border: none; padding: 0 20px; border-radius: 25px; cursor: pointer; font-weight: bold; transition: 0.2s;">Gửi</button>
+                    </div>  
+                </div>
+
+                <!-- JAVASCRIPT XỬ LÝ CHAT -->
+                <script>
+                    async function sendMessage() {
+                        const inputField = document.getElementById('user-input');
+                        const message = inputField.value.trim();
+                        if (!message) return;
+
+                        const chatHistory = document.getElementById('chat-history');
+
+                        // Hiện tin nhắn người dùng (Xanh, lề phải)
+                        chatHistory.innerHTML += `<div style="align-self: flex-end; background: #0d6efd; color: white; padding: 12px 18px; border-radius: 18px; max-width: 80%; line-height: 1.4; word-wrap: break-word;">${message}</div>`;
+                        inputField.value = ''; 
+                        chatHistory.scrollTop = chatHistory.scrollHeight;
+
+                        // Hiện AI đang gõ
+                        const typingId = 'typing-' + Date.now();
+                        chatHistory.innerHTML += `<div id="${typingId}" style="align-self: flex-start; background: #e4e6eb; color: #65676b; padding: 12px 18px; border-radius: 18px; font-style: italic; max-width: 80%;">Đang suy nghĩ...</div>`;
+                        chatHistory.scrollTop = chatHistory.scrollHeight;
+
+                        // Gọi API
+                        try {
+                               const response = await fetch('/api/chat/', {
+                                   method: 'POST',
+                                   headers: { 'Content-Type': 'application/json' },
+                                   body: JSON.stringify({ message: message })
+                            });
+                            const data = await response.json();
+
+                            // Xóa "đang gõ" và hiện câu trả lời (Xám, lề trái)
+                            document.getElementById(typingId).remove();
+                            chatHistory.innerHTML += `<div style="align-self: flex-start; background: #e4e6eb; color: #050505; padding: 12px 18px; border-radius: 18px; max-width: 80%; line-height: 1.4; white-space: pre-wrap;">${data.reply || data.error}</div>`;
+                            chatHistory.scrollTop = chatHistory.scrollHeight;
+                        } catch (error) {
+                            document.getElementById(typingId).remove();
+                            chatHistory.innerHTML += `<div style="align-self: flex-start; background: #ffebee; color: #d32f2f; padding: 12px 18px; border-radius: 18px;">Lỗi kết nối, vui lòng thử lại!</div>`;
+                        }
+                    }
+
+                    // Nhấn Enter để gửi
+                    document.getElementById('user-input').addEventListener('keypress', function(e) {
+                        if (e.key === 'Enter') sendMessage();
+                    });
+                </script>
+                {% endblock %}

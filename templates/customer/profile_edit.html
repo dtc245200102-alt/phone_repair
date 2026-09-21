@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container" style="max-width: 850px;">
+
+    <div class="mb-4">
+        <a
+            href="{% url 'accounts:customer_profile' %}"
+            class="text-decoration-none"
+        >
+            <i class="bi bi-arrow-left me-1"></i>
+            Quay lại hồ sơ
+        </a>
+    </div>
+
+
+    <div class="bg-white rounded-4 shadow-sm p-4 p-md-5">
+
+        <div class="text-center mb-4">
+
+            {% if profile_user.avatar %}
+                <img
+                    src="{{ profile_user.avatar.url }}"
+                    alt="Avatar"
+                    style="
+                        width:120px;
+                        height:120px;
+                        object-fit:cover;
+                        border-radius:50%;
+                    "
+                >
+            {% else %}
+                <div
+                    class="mx-auto d-flex align-items-center justify-content-center"
+                    style="
+                        width:120px;
+                        height:120px;
+                        border-radius:50%;
+                        background:#f0f0f5;
+                        color:#007aff;
+                        font-size:55px;
+                    "
+                >
+                    <i class="bi bi-person"></i>
+                </div>
+            {% endif %}
+
+            <h3 class="mt-3">
+                Chỉnh sửa hồ sơ
+            </h3>
+
+            <p class="text-muted">
+                Cập nhật thông tin cá nhân của bạn
+            </p>
+
+        </div>
+
+
+        <form method="post" enctype="multipart/form-data">
+
+            {% csrf_token %}
+
+
+            <div class="row g-3">
+
+                <div class="col-md-6">
+
+                    <label class="form-label fw-semibold">
+                        Họ và tên đệm
+                    </label>
+
+                    {{ form.last_name }}
+
+                </div>
+
+
+                <div class="col-md-6">
+
+                    <label class="form-label fw-semibold">
+                        Tên
+                    </label>
+
+                    {{ form.first_name }}
+
+                </div>
+
+
+                <div class="col-md-6">
+
+                    <label class="form-label fw-semibold">
+                        Ngày sinh
+                    </label>
+
+                    {{ form.date_of_birth }}
+
+                </div>
+
+
+                <div class="col-12">
+
+                    <label class="form-label fw-semibold">
+                        Ảnh đại diện
+                    </label>
+
+                    {{ form.avatar }}
+
+                    <div class="form-text">
+                        Có thể chọn ảnh JPG, PNG hoặc WEBP.
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- THÔNG TIN KHÔNG ĐƯỢC SỬA -->
+
+            <hr class="my-4">
+
+
+            <h5 class="mb-3">
+                <i class="bi bi-shield-lock me-2"></i>
+                Thông tin đăng ký
+            </h5>
+
+
+            <div class="row g-3">
+
+                <div class="col-md-4">
+
+                    <label class="form-label">
+                        Tên đăng nhập
+                    </label>
+
+                    <input
+                        type="text"
+                        class="form-control bg-light"
+                        value="{{ profile_user.username }}"
+                        readonly
+                    >
+
+                    <small class="text-muted">
+                        Không thể thay đổi
+                    </small>
+
+                </div>
+
+
+                <div class="col-md-4">
+
+                    <label class="form-label">
+                        Email
+                    </label>
+
+                    <input
+                        type="email"
+                        class="form-control bg-light"
+                        value="{{ profile_user.email }}"
+                        readonly
+                    >
+
+                    <small class="text-muted">
+                        Email đăng ký không thể thay đổi
+                    </small>
+
+                </div>
+
+
+                <div class="col-md-4">
+
+                    <label class="form-label">
+                        Số điện thoại
+                    </label>
+
+                    <input
+                        type="text"
+                        class="form-control bg-light"
+                        value="{{ profile_user.phone_number }}"
+                        readonly
+                    >
+
+                    <small class="text-muted">
+                        Số điện thoại không thể thay đổi
+                    </small>
+
+                </div>
+
+            </div>
+
+
+            <div class="d-flex justify-content-end gap-2 mt-4">
+
+                <a
+                    href="{% url 'accounts:customer_profile' %}"
+                    class="btn btn-light rounded-pill px-4"
+                >
+                    Hủy
+                </a>
+
+                <button
+                    type="submit"
+                    class="btn btn-primary rounded-pill px-4"
+                >
+                    <i class="bi bi-check-lg me-1"></i>
+                    Lưu thay đổi
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}

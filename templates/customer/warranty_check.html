@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container my-5" style="max-width: 700px;">
+    <div class="card border-0 shadow-sm" style="border-radius: 20px;">
+        <div class="card-body p-5">
+            <h2 class="fw-bold mb-3 text-center">Tra cứu bảo hành</h2>
+            <p class="text-muted mb-4 text-center">Nhập mã IMEI hoặc Số điện thoại để kiểm tra thông tin và thời hạn bảo hành thiết bị của bạn tại hệ thống KhanhThien SmartPhone.</p>
+
+            {# Bug đã sửa: form cũ action="#" method="GET" nhưng view không đọc #}
+            {# request.GET nên bấm "Kiểm tra ngay" không có tác dụng gì. Giờ form #}
+            {# submit đúng về chính trang này (GET) và view đã xử lý search_code. #}
+            <form method="GET" action="{% url 'accounts:warranty_check' %}">
+                <div class="mb-3 text-start">
+                    <label for="search_code" class="form-label fw-medium">Mã IMEI / Số điện thoại</label>
+                    <input
+                        type="text"
+                        name="search_code"
+                        class="form-control form-control-lg"
+                        id="search_code"
+                        placeholder="Ví dụ: 35xxxxxxxxxxxxx hoặc 09xxxxxxxx"
+                        value="{{ search_code }}"
+                        style="border-radius: 12px;"
+                    >
+                </div>
+                <button type="submit" class="btn btn-primary btn-lg w-100 mt-2" style="border-radius: 980px; background-color: #0071e3; border: none;">
+                    <i class="bi bi-search me-2"></i>Kiểm tra ngay
+                </button>
+            </form>
+
+            {% if searched %}
+                <hr class="my-4">
+                {% if warranties %}
+                    <h5 class="fw-bold mb-3">Kết quả tra cứu</h5>
+                    {% for warranty in warranties %}
+                        <div class="border rounded-4 p-3 mb-3">
+                            <div class="d-flex justify-content-between">
+                                <span class="fw-bold">{{ warranty.ticket.device.brand }} {{ warranty.ticket.device.model_name }}</span>
+                                {% if warranty.is_active %}
+                                    <span class="badge bg-success rounded-pill">Còn hiệu lực</span>
+                                {% else %}
+                                    <span class="badge bg-secondary rounded-pill">Đã hết hạn</span>
+                                {% endif %}
+                            </div>
+                            <div class="text-muted small mt-1">
+                                Mã bảo hành {{ warranty.code|default:"—" }} · Phiếu {{ warranty.ticket.code|default:"—" }} · Bắt đầu {{ warranty.start_date|date:"d/m/Y" }} · Kết thúc {{ warranty.end_date|date:"d/m/Y" }}
+                            {% if warranty.terms %}
+                                <div class="small mt-2">{{ warranty.terms }}</div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center text-muted py-3">
+                        <i class="bi bi-search display-6 opacity-50 d-block mb-2"></i>
+                        Không tìm thấy bảo hành nào khớp với "{{ search_code }}".
+                    </div>
+                {% endif %}
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

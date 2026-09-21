@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% block title %}Phiếu {{ ticket.code }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-3">
+
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Phiếu {{ ticket.code }}</h4>
+    <span class="badge bg-{{ ticket.status_badge_class }} fs-6">{{ ticket.get_status_display }}</span>
+  </div>
+
+  <div class="card mb-3">
+    <div class="card-body">
+      <h5 class="card-title">👤 Thông tin khách hàng & thiết bị</h5>
+      <div class="row">
+        <div class="col-md-6">
+          <p class="mb-1"><strong>Khách hàng:</strong> {{ ticket.device.customer.name }}</p>
+          <p class="mb-1"><strong>Số điện thoại:</strong> {{ ticket.device.customer.phone_number }}</p>
+        </div>
+        <div class="col-md-6">
+          <p class="mb-1"><strong>Thiết bị:</strong> {{ ticket.device.brand }} {{ ticket.device.model_name }}</p>
+          <p class="mb-1"><strong>IMEI:</strong> {{ ticket.device.imei|default:"không" }}</p>
+        </div>
+      </div>
+      <p class="mb-1"><strong>Mô tả lỗi ban đầu:</strong> {{ ticket.issue_description }}</p>
+      <p class="mb-1"><strong>Kỹ thuật viên phụ trách:</strong>
+        {% if ticket.technician %}{{ ticket.technician.get_full_name|default:ticket.technician.username }}{% else %}Chưa nhận{% endif %}
+      </p>
+
+      {% if not ticket.technician %}
+      <form method="post" class="mt-2">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="claim">
+        <button type="submit" class="btn btn-outline-primary">🤚 Nhận phiếu này</button>
+      </form>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-md-6 col-lg-4">
+      <a href="{% url 'technician_status_update' ticket.id %}" class="text-decoration-none">
+        <div class="card h-100 border-primary">
+          <div class="card-body">
+            <h5 class="card-title">📝 Cập nhật trạng thái</h5>
+            <p class="card-text text-muted">Đổi trạng thái phiếu (đang sửa / đã hủy / hoàn thành...), ghi chú kỹ thuật và phí công.</p>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <div class="col-md-6 col-lg-4">
+      <a href="{% url 'technician_parts' ticket.id %}" class="text-decoration-none">
+        <div class="card h-100 border-secondary">
+          <div class="card-body">
+            <h5 class="card-title">📦 Linh kiện đã sử dụng</h5>
+            <p class="card-text text-muted">Ghi nhận linh kiện đã dùng, tự động trừ kho và cộng vào chi phí phiếu.</p>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <div class="col-md-6 col-lg-4">
+      <a href="{% url 'technician_ai_summary' ticket.id %}" class="text-decoration-none">
+        <div class="card h-100 border-info">
+          <div class="card-body">
+            <h5 class="card-title">✨ AI tóm tắt tình trạng máy</h5>
+            <p class="card-text text-muted">Tổng hợp mô tả lỗi + ghi chú kỹ thuật thành đoạn tóm tắt ngắn gọn.</p>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <div class="col-md-6 col-lg-4">
+      <a href="{% url 'technician_ai_progress' ticket.id %}" class="text-decoration-none">
+        <div class="card h-100 border-success">
+          <div class="card-body">
+            <h5 class="card-title">💬 AI soạn tin nhắn tiến độ</h5>
+            <p class="card-text text-muted">Soạn tin nhắn cập nhật tiến độ để gửi cho khách, dựa trên trạng thái hiện tại.</p>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <div class="col-md-6 col-lg-4">
+      <a href="{% url 'technician_ai_explain' ticket.id %}" class="text-decoration-none">
+        <div class="card h-100 border-warning">
+          <div class="card-body">
+            <h5 class="card-title">💡 AI giải thích dịch vụ</h5>
+            <p class="card-text text-muted">Giải thích nguyên nhân, hướng khắc phục và linh kiện dự kiến bằng ngôn ngữ dễ hiểu.</p>
+          </div>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <div class="card mt-3">
+    <div class="card-body">
+      <h5 class="card-title">💰 Chi phí hiện tại</h5>
+      <p class="mb-1">Phí công / dự kiến: <strong>{{ ticket.estimated_cost|floatformat:0 }} đ</strong></p>
+      <p class="mb-1">Tiền linh kiện: <strong>{{ ticket.parts_cost|floatformat:0 }} đ</strong></p>
+      <p class="mb-0 fs-5">Tổng cộng: <strong>{{ ticket.total_cost|floatformat:0 }} đ</strong></p>
+      {% if not ticket.is_cost_visible_to_customer %}
+      <small class="text-muted">Khách hàng chỉ nhìn thấy số tiền này sau khi phiếu chuyển sang "Đã hoàn thành" hoặc "Đã giao khách".</small>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}

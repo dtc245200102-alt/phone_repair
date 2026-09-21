@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}AI giải thích dịch vụ - {{ ticket.code }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-3" style="max-width: 700px;">
+  <a href="{% url 'technician_ticket_detail' ticket.id %}" class="text-decoration-none">&larr; Về trang phiếu {{ ticket.code }}</a>
+
+  <h4 class="mt-2 mb-3">💡 AI giải thích dịch vụ sửa chữa</h4>
+  <p class="text-muted">Giải thích nguyên nhân, hướng khắc phục và linh kiện dự kiến. Xem trước, chỉnh sửa nếu cần, rồi mới lưu / gửi.</p>
+
+  {% if error %}
+  <div class="alert alert-danger">{{ error }}</div>
+  {% endif %}
+
+  {% if draft_explanation is not None %}
+    <div class="card mb-3 border-warning">
+      <div class="card-body">
+        <h6>📝 Bản nháp (chưa lưu, chưa gửi cho ai)</h6>
+        <form method="post">
+          {% csrf_token %}
+          <textarea name="explanation" class="form-control mb-3" rows="6">{{ draft_explanation }}</textarea>
+          <div class="d-flex flex-wrap gap-2">
+            <button type="submit" name="action" value="save" class="btn btn-outline-secondary">💾 Lưu (chưa gửi)</button>
+            <button type="submit" name="action" value="send_customer" class="btn btn-success">📤 Gửi cho khách hàng</button>
+            <button type="submit" name="action" value="send_admin" class="btn btn-primary">📤 Gửi cho Admin</button>
+          </div>
+        </form>
+      </div>
+    </div>
+    <form method="post">
+      {% csrf_token %}
+      <button type="submit" name="action" value="generate" class="btn btn-link px-0">🔄 Tạo lại nháp khác</button>
+    </form>
+  {% else %}
+    <div class="card mb-3">
+      <div class="card-body">
+        <h6>Giải thích hiện tại (đã lưu)</h6>
+        {% if ticket.ai_service_explanation %}
+          <p style="white-space: pre-line;">{{ ticket.ai_service_explanation }}</p>
+          <small class="text-muted">Tạo lúc: {{ ticket.ai_last_generated_at }}</small>
+        {% else %}
+          <p class="text-muted fst-italic">Chưa có giải thích nào được tạo.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <form method="post" id="kt-explain-generate-form">
+      {% csrf_token %}
+      <button type="submit" name="action" value="generate" class="btn btn-warning" id="kt-explain-generate-btn">🔄 {% if ticket.ai_service_explanation %}Tạo lại{% else %}Tạo{% endif %} giải thích</button>
+    </form>
+    <script>
+      document.getElementById('kt-explain-generate-form').addEventListener('submit', function () {
+        var b = document.getElementById('kt-explain-generate-btn');
+        setTimeout(function () {
+          b.disabled = true;
+          b.innerHTML = '⏳ Đang tạo, vui lòng đợi...';
+        }, 0);
+      });
+    </script>
+  {% endif %}
+</div>
+{% endblock %}

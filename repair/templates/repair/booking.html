@@ -1,0 +1,271 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="row justify-content-center my-4">
+    <div class="col-lg-8">
+
+        <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+
+            <div class="card-body p-4 p-md-5">
+
+                <!-- Header -->
+                <div class="text-center mb-4">
+
+                    <div class="text-success mb-3">
+                        <i class="bi bi-calendar-check-fill display-4"></i>
+                    </div>
+
+                    <h2 class="fw-bold">
+                        Đặt lịch sửa chữa
+                    </h2>
+
+                    <p class="text-secondary">
+                        Gửi thông tin thiết bị và yêu cầu sửa chữa
+                        để trung tâm tiếp nhận. Đơn của bạn sẽ được
+                        lưu vào đúng tài khoản đang đăng nhập, xem lại
+                        bất cứ lúc nào ở mục "Tiến độ sửa chữa".
+                    </p>
+
+                </div>
+
+
+                <!-- FORM -->
+                <form id="bookingForm">
+
+                    <div class="row g-3">
+
+                        <!-- Họ tên -->
+                        <div class="col-md-6">
+                            <label for="bookName" class="form-label fw-bold">Họ và tên</label>
+                            <input
+                                type="text"
+                                id="bookName"
+                                class="form-control rounded-3"
+                                placeholder="Nguyễn Văn A"
+                                value="{{ prefill_name }}"
+                                required
+                            >
+                        </div>
+
+                        <!-- Số điện thoại -->
+                        <div class="col-md-6">
+                            <label for="bookPhone" class="form-label fw-bold">Số điện thoại</label>
+                            <input
+                                type="tel"
+                                id="bookPhone"
+                                class="form-control rounded-3"
+                                placeholder="0987654321"
+                                value="{{ prefill_phone }}"
+                                required
+                            >
+                            <div class="form-text">Dùng để liên hệ và tra cứu tiến độ/bảo hành sau này.</div>
+                        </div>
+
+                        <!-- Hãng sản xuất -->
+                        <div class="col-md-6">
+                            <label for="bookBrand" class="form-label fw-bold">Hãng sản xuất</label>
+                            <input
+                                type="text"
+                                id="bookBrand"
+                                class="form-control rounded-3"
+                                placeholder="Apple, Samsung, Xiaomi..."
+                                required
+                            >
+                        </div>
+
+                        <!-- Dòng máy -->
+                        <div class="col-md-6">
+                            <label for="bookModel" class="form-label fw-bold">Dòng máy</label>
+                            <input
+                                type="text"
+                                id="bookModel"
+                                class="form-control rounded-3"
+                                placeholder="iPhone 13 Pro Max"
+                                required
+                            >
+                        </div>
+
+                        <!-- IMEI -->
+                        <div class="col-md-6">
+                            <label for="bookImei" class="form-label fw-bold">
+                                Số IMEI <span class="text-secondary fw-normal">(không bắt buộc)</span>
+                            </label>
+                            <input
+                                type="text"
+                                id="bookImei"
+                                class="form-control rounded-3"
+                                placeholder="Bấm *#06# trên máy để xem"
+                            >
+                        </div>
+
+                        <!-- Màu sắc -->
+                        <div class="col-md-6">
+                            <label for="bookColor" class="form-label fw-bold">
+                                Màu sắc <span class="text-secondary fw-normal">(không bắt buộc)</span>
+                            </label>
+                            <input
+                                type="text"
+                                id="bookColor"
+                                class="form-control rounded-3"
+                                placeholder="Đen, Trắng, Xanh..."
+                            >
+                        </div>
+
+                        <!-- Thời gian hẹn -->
+                        <div class="col-12">
+                            <label for="bookPreferredTime" class="form-label fw-bold">
+                                Thời gian muốn mang máy đến <span class="text-secondary fw-normal">(không bắt buộc)</span>
+                            </label>
+                            <input
+                                type="datetime-local"
+                                id="bookPreferredTime"
+                                class="form-control rounded-3"
+                            >
+                        </div>
+
+                        <!-- Mô tả -->
+                        <div class="col-12">
+                            <label for="bookIssue" class="form-label fw-bold">Yêu cầu dịch vụ / Mô tả lỗi</label>
+                            <textarea
+                                id="bookIssue"
+                                class="form-control rounded-3"
+                                rows="4"
+                                placeholder="Ví dụ: Cần thay màn hình, kiểm tra pin..."
+                                required
+                            ></textarea>
+                        </div>
+
+                        <!-- Ghi chú thêm -->
+                        <div class="col-12">
+                            <label for="bookNotes" class="form-label fw-bold">
+                                Ghi chú thêm <span class="text-secondary fw-normal">(không bắt buộc)</span>
+                            </label>
+                            <textarea
+                                id="bookNotes"
+                                class="form-control rounded-3"
+                                rows="2"
+                                placeholder="Ví dụ: máy có dán màn hình cường lực, còn bảo hành hãng..."
+                            ></textarea>
+                        </div>
+
+                        <!-- Submit -->
+                        <div class="col-12 mt-3">
+                            <button
+                                type="submit"
+                                class="btn btn-success w-100 py-3 rounded-3 fw-bold"
+                            >
+                                <i class="bi bi-calendar-check me-1"></i>
+                                Xác nhận đặt lịch
+                            </button>
+                        </div>
+
+                    </div>
+
+                </form>
+
+
+                <!-- Result -->
+                <div
+                    id="bookingAlert"
+                    class="mt-3 d-none"
+                ></div>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+
+<script>
+async function submitBooking() {
+    const name = document.getElementById("bookName").value.trim();
+    const phone = document.getElementById("bookPhone").value.trim();
+    const brand = document.getElementById("bookBrand").value.trim();
+    const modelName = document.getElementById("bookModel").value.trim();
+    const imei = document.getElementById("bookImei").value.trim();
+    const color = document.getElementById("bookColor").value.trim();
+    const preferredTime = document.getElementById("bookPreferredTime").value;
+    const issue = document.getElementById("bookIssue").value.trim();
+    const notes = document.getElementById("bookNotes").value.trim();
+    const alertBox = document.getElementById("bookingAlert");
+
+    if (!name || !phone || !brand || !modelName || !issue) {
+        alertBox.className = "alert alert-warning mt-3";
+        alertBox.innerText =
+            "Vui lòng điền đầy đủ các thông tin bắt buộc.";
+        alertBox.classList.remove("d-none");
+        return;
+    }
+
+    try {
+        const response = await fetch(
+            "{% url 'create_booking_api' %}",
+            {
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": "{{ csrf_token }}"
+                },
+
+                body: JSON.stringify({
+                    customer_name: name,
+                    phone_number: phone,
+                    brand: brand,
+                    model_name: modelName,
+                    imei: imei,
+                    color: color,
+                    preferred_time: preferredTime ? new Date(preferredTime).toISOString() : "",
+                    issue_description: issue,
+                    notes: notes
+                })
+            }
+        );
+
+        const data = await response.json();
+
+        if (response.ok) {
+            alertBox.className = "alert alert-success mt-3";
+
+            alertBox.innerText =
+                "Đặt lịch thành công! Mã phiếu: " +
+                (data.ticket_code || ("#" + data.ticket_id)) +
+                " — Bạn có thể theo dõi ở mục \"Tiến độ sửa chữa\".";
+
+            document.getElementById("bookingForm").reset();
+            document.getElementById("bookName").value = name;
+            document.getElementById("bookPhone").value = phone;
+
+        } else {
+            alertBox.className = "alert alert-danger mt-3";
+
+            alertBox.innerText =
+                data.error ||
+                "Có lỗi xảy ra, vui lòng thử lại.";
+        }
+
+    } catch (error) {
+        alertBox.className = "alert alert-danger mt-3";
+
+        alertBox.innerText =
+            "Không thể kết nối đến máy chủ.";
+    }
+
+    alertBox.classList.remove("d-none");
+}
+
+
+document
+    .getElementById("bookingForm")
+    .addEventListener("submit", function (event) {
+
+        event.preventDefault();
+
+        submitBooking();
+    });
+</script>
+
+{% endblock %}
