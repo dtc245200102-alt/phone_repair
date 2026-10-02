@@ -271,101 +271,6 @@
                 </button>
 
 
-                <!-- PANEL THÔNG BÁO (trượt từ bên phải) -->
-
-                <div class="kt-notif-backdrop" id="ktNotifBackdrop"></div>
-
-                <div
-                    class="kt-notif-panel"
-                    id="ktNotifPanel"
-                    role="dialog"
-                    aria-modal="true"
-                    aria-labelledby="ktNotifPanelTitle"
-                >
-
-                    <div class="kt-notif-panel-header">
-
-                        <div>
-
-                            <h6 id="ktNotifPanelTitle" class="mb-1">
-                                Thông báo
-                            </h6>
-
-                            <small class="text-muted">
-                                {% if unread_notifications_count > 0 %}
-                                    Bạn có {{ unread_notifications_count }} thông báo chưa đọc
-                                {% else %}
-                                    Bạn đã xem hết thông báo
-                                {% endif %}
-                            </small>
-
-                        </div>
-
-                        <button
-                            type="button"
-                            class="kt-notif-close"
-                            id="ktNotifClose"
-                            aria-label="Đóng bảng thông báo"
-                        >
-                            <i class="bi bi-x-lg"></i>
-                        </button>
-
-                    </div>
-
-                    <div class="kt-notif-panel-body">
-
-                        {% for notif in recent_notifications %}
-
-                            <a
-                                class="
-                                    kt-notif-item
-                                    {% if not notif.is_read %}
-                                        unread
-                                    {% endif %}
-                                "
-                                href="{% url 'accounts:notification_detail' notif.pk %}"
-                            >
-
-                                <span class="kt-notif-item-icon">
-                                    <i class="bi bi-info-circle"></i>
-                                </span>
-
-                                <span class="kt-notif-item-body">
-
-                                    <span class="kt-notif-item-title">
-                                        {{ notif.title }}
-                                    </span>
-
-                                    <span class="kt-notif-item-msg">
-                                        {{ notif.message }}
-                                    </span>
-
-                                    <span class="kt-notif-item-time">
-                                        {{ notif.created_at|timesince }} trước
-                                    </span>
-
-                                </span>
-
-                                {% if not notif.is_read %}
-                                    <span class="kt-notif-dot" aria-hidden="true"></span>
-                                {% endif %}
-
-                            </a>
-
-                        {% empty %}
-
-                            <div class="kt-notif-empty">
-                                <i class="bi bi-bell-slash"></i>
-                                <p class="mb-0">Bạn chưa có thông báo nào.</p>
-                            </div>
-
-                        {% endfor %}
-
-                    </div>
-
-                </div>
-
-
                 <!-- HỒ SƠ -->
 
                 <a
@@ -418,6 +323,101 @@
             </form>
 
         </aside>
+
+
+        <!-- PANEL THÔNG BÁO: đặt ngoài sidebar để fixed bám theo viewport -->
+
+        <div class="kt-notif-backdrop" id="ktNotifBackdrop"></div>
+
+        <div
+            class="kt-notif-panel"
+            id="ktNotifPanel"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="ktNotifPanelTitle"
+        >
+
+            <div class="kt-notif-panel-header">
+
+                <div>
+
+                    <h6 id="ktNotifPanelTitle" class="mb-1">
+                        Thông báo
+                    </h6>
+
+                    <small class="text-muted">
+                        {% if unread_notifications_count > 0 %}
+                            Bạn có {{ unread_notifications_count }} thông báo chưa đọc
+                        {% else %}
+                            Bạn đã xem hết thông báo
+                        {% endif %}
+                    </small>
+
+                </div>
+
+                <button
+                    type="button"
+                    class="kt-notif-close"
+                    id="ktNotifClose"
+                    aria-label="Đóng bảng thông báo"
+                >
+                    <i class="bi bi-x-lg"></i>
+                </button>
+
+            </div>
+
+            <div class="kt-notif-panel-body">
+
+                {% for notif in recent_notifications %}
+
+                    <a
+                        class="
+                            kt-notif-item
+                            {% if not notif.is_read %}
+                                unread
+                            {% endif %}
+                        "
+                        href="{% url 'accounts:notification_detail' notif.pk %}"
+                    >
+
+                        <span class="kt-notif-item-icon">
+                            <i class="bi bi-info-circle"></i>
+                        </span>
+
+                        <span class="kt-notif-item-body">
+
+                            <span class="kt-notif-item-title">
+                                {{ notif.title }}
+                            </span>
+
+                            <span class="kt-notif-item-msg">
+                                {{ notif.message }}
+                            </span>
+
+                            <span class="kt-notif-item-time">
+                                {{ notif.created_at|timesince }} trước
+                            </span>
+
+                        </span>
+
+                        {% if not notif.is_read %}
+                            <span class="kt-notif-dot" aria-hidden="true"></span>
+                        {% endif %}
+
+                    </a>
+
+                {% empty %}
+
+                    <div class="kt-notif-empty">
+                        <i class="bi bi-bell-slash"></i>
+                        <p class="mb-0">Bạn chưa có thông báo nào.</p>
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        </div>
 
         {% endwith %}
 
