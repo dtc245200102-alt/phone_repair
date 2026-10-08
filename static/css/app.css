@@ -3935,3 +3935,126 @@ textarea:focus-visible {
         width: 100%;
     }
 }
+
+/* High-contrast corrections for the light application theme. */
+.kt-technician-main .table {
+    color: #344b60 !important;
+    --bs-table-bg: transparent;
+    --bs-table-color: #344b60;
+    --bs-table-hover-bg: #f1f6f8;
+    --bs-table-hover-color: #1b2d40;
+}
+
+.kt-technician-main .table thead th {
+    color: #40566b !important;
+    background: #f4f7fa !important;
+    border-color: #dfe7ef !important;
+}
+
+.kt-technician-main .table tbody td,
+.kt-technician-main .table tbody td .text-secondary {
+    color: #344b60 !important;
+    border-color: #e5ebf1 !important;
+}
+
+.kt-technician-main .table tbody td .kt-table-primary {
+    color: #1b2d40 !important;
+}
+
+.kt-technician-main .table tbody td small {
+    color: #607286 !important;
+}
+
+.kt-technician-main .table tbody tr:hover {
+    color: #1b2d40 !important;
+    background: #f4f8fa !important;
+}
+
+.kt-technician-main .form-control,
+.kt-technician-main .form-select {
+    color: #24384c !important;
+    background-color: #ffffff !important;
+    border-color: #cdd9e3 !important;
+}
+
+.kt-technician-main .form-control::placeholder {
+    color: #8292a2 !important;
+    opacity: 1;
+}
+
+.kt-technician-main .form-control:focus,
+.kt-technician-main .form-select:focus {
+    color: #1b2d40 !important;
+    background-color: #ffffff !important;
+    border-color: #5d9bac !important;
+}
+
+.kt-technician-main .form-label {
+    color: #40566b !important;
+}
+
+.kt-auth-panel .alert-danger {
+    color: #8f2835 !important;
+    background: #fff1f2 !important;
+    border-color: #f0c5cb !important;
+}
+
+.kt-auth-panel .btn-outline-primary {
+    color: #176b87 !important;
+    background: #ffffff !important;
+    border-color: #9cbec9 !important;
+}
+
+.kt-auth-panel .btn-outline-primary:hover {
+    color: #ffffff !important;
+    background: #176b87 !important;
+    border-color: #176b87 !important;
+}
+
+.kt-register-form .text-danger,
+.kt-auth-panel .text-danger {
+    color: #b42332 !important;
+}
+
+.kt-register-form .form-text {
+    color: #607286 !important;
+}
+
+.kt-notif-panel {
+    color: #1b2d40 !important;
+    background: #ffffff !important;
+    border-color: #dfe7ef !important;
+    box-shadow: -18px 0 45px rgba(27, 45, 64, .16) !important;
+    backdrop-filter: none;
+}
+
+.kt-notif-panel-header {
+    background: #f5f8fa;
+    border-color: #dfe7ef !important;
+}
+
+.kt-notif-panel-header h6,
+.kt-notif-item,
+.kt-notif-item-title {
+    color: #1b2d40 !important;
+}
+
+.kt-notif-panel-header .text-muted,
+.kt-notif-item-msg,
+.kt-notif-item-time,
+.kt-notif-empty {
+    color: #607286 !important;
+}
+
+.kt-notif-item {
+    border-color: #e5ebf1 !important;
+}
+
+.kt-notif-item.unread {
+    background: #e8f3f6 !important;
+}
+
+.kt-notif-item:hover,
+.kt-notif-item.unread:hover {
+    background: #f1f6f8 !important;
+}

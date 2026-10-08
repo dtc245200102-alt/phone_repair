@@ -128,8 +128,8 @@ body {
     width: auto !important;
     height: auto !important;
 
-    max-width: 72px !important;
-    max-height: 72px !important;
+    max-width: 100px !important;
+    max-height: 100px !important;
 
     margin: 0 0 14px 0 !important;
 
@@ -815,8 +815,8 @@ aside.app-sidebar .sidebar-menu .nav-link.active {
     }
 
     .app-sidebar .sidebar-brand a.brand-link img.brand-image {
-        max-width: 54px !important;
-        max-height: 54px !important;
+        max-width: 84px !important;
+        max-height: 84px !important;
 
         margin-bottom: 10px !important;
     }
@@ -835,8 +835,8 @@ aside.app-sidebar .sidebar-menu .nav-link.active {
     }
 
     .app-sidebar .sidebar-brand a.brand-link img.brand-image {
-        max-width: 40px !important;
-        max-height: 40px !important;
+        max-width: 68px !important;
+        max-height: 68px !important;
 
         margin-bottom: 6px !important;
     }
