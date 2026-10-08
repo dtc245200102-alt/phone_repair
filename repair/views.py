@@ -1,25 +1,29 @@
+import json
 import logging
 from decimal import Decimal
 
-from django.contrib.auth import get_user_model
 from django.contrib import admin
+from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
+from django.db import IntegrityError
 from django.db.models import Count, F, Q, Sum
+from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.utils.dateparse import parse_datetime
 from rest_framework import viewsets
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import (
+    api_view,
+    permission_classes,
+    throttle_classes,
+)
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-import json
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from .ai_service import chat_with_ai
-from django.db import IntegrityError
-from django.utils.dateparse import parse_datetime
+from rest_framework.throttling import UserRateThrottle
 
 from accounts.models import Notification
 from . import admin_ai_service, ai_service
+from .ai_service import chat_with_ai
 from .models import (
     AdminAIChatMessage,
     Customer,
@@ -46,6 +50,7 @@ from .serializers import (
 )
 
 logger = logging.getLogger(__name__)
+MAX_AI_INPUT_LENGTH = 2_000
 
 
 # ==========================================
@@ -149,11 +154,19 @@ class WarrantyViewSet(viewsets.ModelViewSet):
 
 
 @api_view(["POST"])
+@permission_classes([IsAuthenticated])
+@throttle_classes([UserRateThrottle])
 def ai_diagnose_api(request):
     """API chẩn đoán lỗi bằng AI (ngôn ngữ dễ hiểu cho khách), dùng cho AJAX/App."""
     issue_description = request.data.get("issue", "")
-    if not issue_description:
-        return Response({"error": "Vui lòng cung cấp mô tả lỗi"}, status=400)
+    if not isinstance(issue_description, str) or not issue_description.strip():
+        return Response({"error": "Vui lòng cung cấp mô tả lỗi."}, status=400)
+    issue_description = issue_description.strip()
+    if len(issue_description) > MAX_AI_INPUT_LENGTH:
+        return Response(
+            {"error": "Mô tả lỗi không được vượt quá 2.000 ký tự."},
+            status=400,
+        )
     result = ai_service.explain_service(issue_description)
     return Response({"diagnosis": result})
 
@@ -235,11 +248,12 @@ def create_booking_view(request):
 
 @api_view(["POST"])
 @permission_classes([IsTechnicianOrManager])
+@throttle_classes([UserRateThrottle])
 def ai_summarize_api(request, ticket_id):
     """Chức năng AI số 1: AI tóm tắt tình trạng máy từ ghi chú kỹ thuật."""
     try:
-        ticket = RepairTicket.objects.select_related("device__customer").get(pk=ticket_id)
-    except RepairTicket.DoesNotExist:
+        ticket = _get_ticket_for_technician(request, ticket_id)
+    except Http404:
         return Response({"error": "Không tìm thấy phiếu sửa chữa."}, status=404)
 
     summary = ai_service.summarize_device_condition(
@@ -253,11 +267,12 @@ def ai_summarize_api(request, ticket_id):
 
 @api_view(["POST"])
 @permission_classes([IsTechnicianOrManager])
+@throttle_classes([UserRateThrottle])
 def send_progress_update_api(request, ticket_id):
     """Chức năng AI số 2: AI sinh tin nhắn cập nhật tiến độ cho khách."""
     try:
-        ticket = RepairTicket.objects.select_related("device__customer").get(pk=ticket_id)
-    except RepairTicket.DoesNotExist:
+        ticket = _get_ticket_for_technician(request, ticket_id)
+    except Http404:
         return Response({"error": "Không tìm thấy phiếu sửa chữa."}, status=404)
 
     device_info = ai_service.DeviceInfo(brand=ticket.device.brand, model_name=ticket.device.model_name)
@@ -332,6 +347,7 @@ def _compute_admin_insight_data():
 
 @api_view(["POST"])
 @permission_classes([IsManager])
+@throttle_classes([UserRateThrottle])
 def admin_ai_insight_api(request):
     data = _compute_admin_insight_data()
     report = ai_service.generate_admin_insight_report(
@@ -404,67 +420,7 @@ def _is_technician_or_manager(user):
     return bool(user.is_authenticated) and (user.is_superuser or role in ("TECHNICIAN", "MANAGER"))
 
 
-def _notify_ticket_update(
-    ticket,
-    title,
-    message,
-    audience="all",
-):
-    
-    User = get_user_model()
-    recipients = []
-
-    customer_user = getattr(
-        ticket.device.customer,
-        "user",
-        None,
-    )
-
-    # Gửi đúng cho khách hàng sở hữu phiếu.
-    if audience in ("customer", "all"):
-        if customer_user is not None:
-            recipients.append(customer_user)
-
-    # Gửi cho Admin / Quản lý.
-    if audience in ("admin", "all"):
-        admin_users = User.objects.filter(
-            Q(role="MANAGER") | Q(is_superuser=True)
-        )
-
-        if customer_user is not None:
-            admin_users = admin_users.exclude(
-                pk=customer_user.pk
-            )
-
-        recipients.extend(admin_users)
-
-    if not recipients:
-        return
-
-    notifications = [
-        Notification(
-            user=user,
-            ticket=ticket,
-            title=title,
-            message=message,
-        )
-        for user in recipients
-    ]
-
-    Notification.objects.bulk_create(notifications)
-
-
-def _get_ticket_for_technician(request, ticket_id):
-   
-    ticket = get_object_or_404(
-        RepairTicket.objects.select_related("device", "device__customer", "technician"),
-        pk=ticket_id,
-    )
-    return ticket
-
-
 def _notify_ticket_update(ticket, title, message, audience="all"):
-   
     User = get_user_model()
     recipients = []
 
@@ -473,36 +429,58 @@ def _notify_ticket_update(ticket, title, message, audience="all"):
         recipients.append(customer_user)
 
     if audience in ("all", "admin"):
-        admin_qs = User.objects.filter(Q(role="MANAGER") | Q(is_superuser=True))
+        admin_qs = User.objects.filter(
+            Q(role="MANAGER") | Q(is_superuser=True)
+        )
         if recipients:
             admin_qs = admin_qs.exclude(pk=recipients[0].pk)
         recipients.extend(admin_qs)
 
-    if not recipients:
+    recipients_by_id = {recipient.pk: recipient for recipient in recipients}
+    if not recipients_by_id:
         return
 
     Notification.objects.bulk_create(
-        [Notification(user=user, title=title, message=message) for user in recipients]
+        [
+            Notification(
+                user=user,
+                ticket=ticket,
+                title=title,
+                message=message,
+            )
+            for user in recipients_by_id.values()
+        ]
+    )
+
+
+def _technician_ticket_queryset(user):
+    tickets = RepairTicket.objects.select_related(
+        "device", "device__customer", "technician"
+    )
+    if getattr(user, "role", None) == "TECHNICIAN" and not user.is_superuser:
+        tickets = tickets.filter(
+            Q(technician=user) | Q(technician__isnull=True)
+        )
+    return tickets
+
+
+def _get_ticket_for_technician(request, ticket_id):
+    return get_object_or_404(
+        _technician_ticket_queryset(request.user),
+        pk=ticket_id,
     )
 
 
 @login_required(login_url="accounts:login")
 def technician_dashboard_view(request):
-   
     if not _is_technician_or_manager(request.user):
         return redirect("accounts:login")
 
     status_filter = request.GET.get("status", "")
     q = request.GET.get("q", "").strip()
 
-    tickets = RepairTicket.objects.select_related(
-        "device", "device__customer", "technician"
-    ).order_by("-created_at")
-
-    if getattr(request.user, "role", None) == "TECHNICIAN" and not request.user.is_superuser:
-        tickets = tickets.filter(
-            Q(technician=request.user) | Q(technician__isnull=True)
-        )
+    visible_tickets = _technician_ticket_queryset(request.user)
+    tickets = visible_tickets.order_by("-created_at")
 
     if status_filter:
         tickets = tickets.filter(status=status_filter)
@@ -516,12 +494,13 @@ def technician_dashboard_view(request):
         )
 
     stats = {
-        "pending": RepairTicket.objects.filter(status="PENDING").count(),
-        "in_progress": RepairTicket.objects.filter(status="IN_PROGRESS").count(),
-        "done_today": RepairTicket.objects.filter(
-            status="DONE", updated_at__date=timezone.now().date()
+        "pending": visible_tickets.filter(status="PENDING").count(),
+        "in_progress": visible_tickets.filter(status="IN_PROGRESS").count(),
+        "done_today": visible_tickets.filter(
+            status__in=RepairTicket.COST_VISIBLE_STATUSES,
+            completed_at__date=timezone.localdate(),
         ).count(),
-        "mine": RepairTicket.objects.filter(technician=request.user).count(),
+        "mine": visible_tickets.filter(technician=request.user).count(),
     }
 
     return render(
@@ -1024,10 +1003,30 @@ def admin_ai_chat_api(request):
             {"success": False, "message": "Dữ liệu gửi lên không hợp lệ."}, status=400
         )
 
-    question = (payload.get("message") or "").strip()
+    if not isinstance(payload, dict):
+        return JsonResponse(
+            {"success": False, "message": "Dữ liệu gửi lên không hợp lệ."},
+            status=400,
+        )
+
+    question = payload.get("message") or ""
+    if not isinstance(question, str):
+        return JsonResponse(
+            {"success": False, "message": "Câu hỏi phải là văn bản."},
+            status=400,
+        )
+    question = question.strip()
     if not question:
         return JsonResponse(
             {"success": False, "message": "Vui lòng nhập câu hỏi."}, status=400
+        )
+    if len(question) > MAX_AI_INPUT_LENGTH:
+        return JsonResponse(
+            {
+                "success": False,
+                "message": "Câu hỏi không được vượt quá 2.000 ký tự.",
+            },
+            status=400,
         )
 
     # Lưu câu hỏi của Quản lý trước, để lịch sử chat không bị mất nội dung
@@ -1068,20 +1067,31 @@ def admin_ai_chat_api(request):
     )
 
 
-@csrf_exempt
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+@throttle_classes([UserRateThrottle])
 def api_chat_endpoint(request):
-    if request.method != 'POST':
-        return JsonResponse({'error': 'Lỗi kết nối'}, status=400)
+    message = request.data.get("message", "")
+    if not isinstance(message, str) or not message.strip():
+        return Response(
+            {"error": "Vui lòng nhập nội dung cần tư vấn."},
+            status=400,
+        )
+
+    message = message.strip()
+    if len(message) > MAX_AI_INPUT_LENGTH:
+        return Response(
+            {"error": "Nội dung không được vượt quá 2.000 ký tự."},
+            status=400,
+        )
 
     try:
-        data = json.loads(request.body)
-    except (json.JSONDecodeError, UnicodeDecodeError):
-        return JsonResponse({'error': 'Dữ liệu gửi lên không hợp lệ.'}, status=400)
-
-    try:
-        ai_reply = chat_with_ai(data.get('message', ''))
+        ai_reply = chat_with_ai(message)
     except Exception:
         logger.exception("Lỗi khi gọi AI chat")
-        return JsonResponse({'error': 'Có lỗi xảy ra, vui lòng thử lại sau.'}, status=500)
+        return Response(
+            {"error": "Có lỗi xảy ra, vui lòng thử lại sau."},
+            status=500,
+        )
 
-    return JsonResponse({'reply': ai_reply})
+    return Response({"reply": ai_reply})

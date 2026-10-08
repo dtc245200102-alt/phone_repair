@@ -128,20 +128,20 @@ def _tickets_in_range(start_date, end_date):
 
 def _revenue_in_range(start_date, end_date) -> Decimal:
     """Doanh thu = phí công (estimated_cost) + tiền linh kiện, tính trên các
-    phiếu đã DONE/DELIVERED và được cập nhật (updated_at) trong khoảng ngày
-    tương ứng — coi thời điểm cập nhật gần nhất là thời điểm "chốt" phiếu.
+    phiếu đã DONE/DELIVERED theo thời điểm hoàn thành lần đầu. Chỉnh sửa ghi
+    chú sau khi hoàn tất không làm doanh thu bị chuyển sang ngày khác.
     """
     labor_total = (
         RepairTicket.objects.filter(
             status__in=REVENUE_STATUSES,
-            updated_at__date__range=(start_date, end_date),
+            completed_at__date__range=(start_date, end_date),
         ).aggregate(total=Sum("estimated_cost"))["total"]
         or Decimal("0")
     )
     parts_total = (
         TicketPart.objects.filter(
             ticket__status__in=REVENUE_STATUSES,
-            ticket__updated_at__date__range=(start_date, end_date),
+            ticket__completed_at__date__range=(start_date, end_date),
         ).aggregate(total=Sum(F("quantity") * F("unit_price")))["total"]
         or Decimal("0")
     )
@@ -437,7 +437,10 @@ def _handle_ticket_in_progress(question):
 
 def _handle_ticket_completed_today(question):
     today = timezone.localdate()
-    qs = RepairTicket.objects.filter(status__in=REVENUE_STATUSES, updated_at__date=today)
+    qs = RepairTicket.objects.filter(
+        status__in=REVENUE_STATUSES,
+        completed_at__date=today,
+    )
     count = qs.count()
     data = _serialize_tickets(qs)
     message = f"Hôm nay có {count} phiếu đã hoàn thành."

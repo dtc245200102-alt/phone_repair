@@ -1,91 +1,162 @@
 {% extends "base.html" %}
 
+{% block title %}Trợ lý AI · KhanhThien SmartPhone{% endblock %}
+
 {% block content %}
+<section class="kt-ai-page" aria-labelledby="ai-page-title">
+    <div class="kt-ai-heading">
+        <span class="kt-eyebrow">
+            <i class="bi bi-stars" aria-hidden="true"></i>
+            Hỗ trợ khách hàng
+        </span>
+        <h1 class="kt-page-title mt-3" id="ai-page-title">Trợ lý sửa chữa</h1>
+        <p class="kt-ai-intro">
+            Mô tả dấu hiệu bạn gặp phải để nhận gợi ý ban đầu và biết bước tiếp theo.
+        </p>
+    </div>
 
-<div class="row justify-content-center my-4">
-    <div class="col-lg-8">
+    <article class="kt-ai-chat card" aria-label="Trao đổi với Trợ lý AI">
+        <div class="kt-ai-chat-header">
+            <div class="kt-ai-avatar" aria-hidden="true">
+                <i class="bi bi-cpu-fill"></i>
+            </div>
+            <div>
+                <h2 class="h5 mb-1">KhanhThien Assistant</h2>
+                <p class="small mb-0">Gợi ý sơ bộ · Kỹ thuật viên xác nhận trực tiếp</p>
+            </div>
+            <span class="kt-ai-status ms-auto">
+                <span class="kt-ai-status-dot" aria-hidden="true"></span>
+                Sẵn sàng hỗ trợ
+            </span>
+        </div>
 
-        <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+        <div
+            id="chat-history"
+            class="kt-ai-chat-history"
+            role="log"
+            aria-live="polite"
+            aria-relevant="additions"
+            aria-label="Lịch sử trao đổi"
+        >
+            <div class="kt-ai-message kt-ai-message--assistant">
+                <span class="kt-ai-message-icon" aria-hidden="true">
+                    <i class="bi bi-stars"></i>
+                </span>
+                <p class="kt-ai-bubble mb-0">
+                    Xin chào! Bạn hãy mô tả dấu hiệu, thời điểm bắt đầu và những gì đã thử.
+                    Không cần gửi mật khẩu, mã xác minh hoặc thông tin thanh toán.
+                </p>
+            </div>
+        </div>
 
-            <div class="card-body p-4 p-md-5">
+        <div class="kt-ai-notice" id="ai-safety-note">
+            <i class="bi bi-info-circle-fill" aria-hidden="true"></i>
+            AI chỉ đưa ra gợi ý ban đầu, không thay thế kiểm tra trực tiếp hoặc báo giá.
+            Nếu pin phồng, máy nóng bất thường hay bị vào nước, hãy tắt máy, ngừng sạc
+            và liên hệ kỹ thuật viên.
+        </div>
 
-                <!-- Header -->
-                <div class="text-center mb-4">
+        <form id="ai-chat-form" class="kt-ai-composer">
+            {% csrf_token %}
+            <label class="visually-hidden" for="user-input">Mô tả tình trạng điện thoại</label>
+            <input
+                type="text"
+                id="user-input"
+                name="message"
+                class="form-control"
+                maxlength="2000"
+                placeholder="Ví dụ: máy nóng khi sạc, pin tụt nhanh..."
+                autocomplete="off"
+                aria-describedby="ai-safety-note"
+                required
+            >
+            <button id="ai-send-button" class="btn btn-primary" type="submit">
+                <span>Gửi</span>
+                <i class="bi bi-arrow-up-right" aria-hidden="true"></i>
+            </button>
+        </form>
+    </article>
+</section>
 
-                    <div class="text-primary mb-3">
-                        <i class="bi bi-cpu-fill display-4"></i>
-                    </div>
+<script>
+    (function () {
+        "use strict";
 
-                    <h2 class="fw-bold mt-2">
-                        Trợ lý AI chẩn đoán sự cố
-                    </h2>
+        const form = document.getElementById("ai-chat-form");
+        const input = document.getElementById("user-input");
+        const sendButton = document.getElementById("ai-send-button");
+        const history = document.getElementById("chat-history");
+        const csrfToken = form.querySelector('input[name="csrfmiddlewaretoken"]').value;
 
-                    <p class="text-secondary">
-                        Mô tả tình trạng thiết bị để nhận
-                        phân tích nguyên nhân và phương án xử lý.
-                    </p>
+        function addMessage(text, sender) {
+            const row = document.createElement("div");
+            row.className = "kt-ai-message kt-ai-message--" + sender;
 
-                </div>
+            const bubble = document.createElement("p");
+            bubble.className = "kt-ai-bubble mb-0";
+            bubble.textContent = text;
 
+            if (sender === "assistant") {
+                const icon = document.createElement("span");
+                icon.className = "kt-ai-message-icon";
+                icon.setAttribute("aria-hidden", "true");
+                icon.innerHTML = '<i class="bi bi-stars"></i>';
+                row.append(icon, bubble);
+            } else {
+                row.appendChild(bubble);
+            }
 
-                <!-- KHUNG CHAT AI -->
-                <div style="max-width: 100%; margin: 20px auto; border: 1px solid #ddd; border-radius: 15px; display: flex; flex-direction: column; height: 500px; background-color: #ffffff; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
-    
-                    <!-- Lịch sử tin nhắn -->
-                    <div id="chat-history" style="flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; background: #f0f2f5; border-top-left-radius: 15px; border-top-right-radius: 15px;">
-                       <div style="align-self: flex-start; background: #e4e6eb; color: #050505; padding: 12px 18px; border-radius: 18px; max-width: 80%; line-height: 1.4;">
-                            Chào bạn! Tôi là trợ lý AI của KhanhThien SmartPhone. Bạn đang gặp sự cố gì với điện thoại vậy?
-                       </div>
-                    </div>
+            history.appendChild(row);
+            history.scrollTop = history.scrollHeight;
+            return row;
+        }
 
-                    <!-- Khu vực nhập tin -->
-                    <div style="display: flex; padding: 15px; border-top: 1px solid #ddd; background: #fff; border-bottom-left-radius: 15px; border-bottom-right-radius: 15px;">
-                        <input type="text" id="user-input" placeholder="Nhập tình trạng máy (VD: Rơi vỡ màn hình)..." style="flex: 1; padding: 12px 20px; border: 1px solid #ccc; border-radius: 25px; outline: none; margin-right: 10px; font-size: 15px;">
-                        <button onclick="sendMessage()" style="background: #0d6efd; color: white; border: none; padding: 0 20px; border-radius: 25px; cursor: pointer; font-weight: bold; transition: 0.2s;">Gửi</button>
-                    </div>  
-                </div>
+        form.addEventListener("submit", async function (event) {
+            event.preventDefault();
+            const message = input.value.trim();
+            if (!message || sendButton.disabled) {
+                return;
+            }
 
-                <!-- JAVASCRIPT XỬ LÝ CHAT -->
-                <script>
-                    async function sendMessage() {
-                        const inputField = document.getElementById('user-input');
-                        const message = inputField.value.trim();
-                        if (!message) return;
+            addMessage(message, "user");
+            input.value = "";
+            sendButton.disabled = true;
 
-                        const chatHistory = document.getElementById('chat-history');
+            const loadingMessage = addMessage("Đang xem xét mô tả của bạn…", "assistant");
+            loadingMessage.setAttribute("aria-busy", "true");
 
-                        // Hiện tin nhắn người dùng (Xanh, lề phải)
-                        chatHistory.innerHTML += `<div style="align-self: flex-end; background: #0d6efd; color: white; padding: 12px 18px; border-radius: 18px; max-width: 80%; line-height: 1.4; word-wrap: break-word;">${message}</div>`;
-                        inputField.value = ''; 
-                        chatHistory.scrollTop = chatHistory.scrollHeight;
+            try {
+                const response = await fetch("{% url 'api_chat' %}", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": csrfToken,
+                    },
+                    body: JSON.stringify({ message: message }),
+                });
+                const payload = await response.json();
+                loadingMessage.remove();
 
-                        // Hiện AI đang gõ
-                        const typingId = 'typing-' + Date.now();
-                        chatHistory.innerHTML += `<div id="${typingId}" style="align-self: flex-start; background: #e4e6eb; color: #65676b; padding: 12px 18px; border-radius: 18px; font-style: italic; max-width: 80%;">Đang suy nghĩ...</div>`;
-                        chatHistory.scrollTop = chatHistory.scrollHeight;
+                if (!response.ok) {
+                    addMessage(
+                        payload.error || "Chưa gửi được câu hỏi. Vui lòng thử lại.",
+                        "assistant"
+                    );
+                    return;
+                }
 
-                        // Gọi API
-                        try {
-                               const response = await fetch('/api/chat/', {
-                                   method: 'POST',
-                                   headers: { 'Content-Type': 'application/json' },
-                                   body: JSON.stringify({ message: message })
-                            });
-                            const data = await response.json();
-
-                            // Xóa "đang gõ" và hiện câu trả lời (Xám, lề trái)
-                            document.getElementById(typingId).remove();
-                            chatHistory.innerHTML += `<div style="align-self: flex-start; background: #e4e6eb; color: #050505; padding: 12px 18px; border-radius: 18px; max-width: 80%; line-height: 1.4; white-space: pre-wrap;">${data.reply || data.error}</div>`;
-                            chatHistory.scrollTop = chatHistory.scrollHeight;
-                        } catch (error) {
-                            document.getElementById(typingId).remove();
-                            chatHistory.innerHTML += `<div style="align-self: flex-start; background: #ffebee; color: #d32f2f; padding: 12px 18px; border-radius: 18px;">Lỗi kết nối, vui lòng thử lại!</div>`;
-                        }
-                    }
-
-                    // Nhấn Enter để gửi
-                    document.getElementById('user-input').addEventListener('keypress', function(e) {
-                        if (e.key === 'Enter') sendMessage();
-                    });
-                </script>
-                {% endblock %}
+                addMessage(payload.reply, "assistant");
+            } catch (error) {
+                loadingMessage.remove();
+                addMessage(
+                    "Không thể kết nối lúc này. Vui lòng thử lại sau.",
+                    "assistant"
+                );
+            } finally {
+                sendButton.disabled = false;
+                input.focus();
+            }
+        });
+    })();
+</script>
+{% endblock %}

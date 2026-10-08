@@ -80,7 +80,28 @@ def customer_dashboard(request):
     """Dashboard dành cho Khách hàng."""
     if request.user.is_staff:
         return redirect("admin:index")
-    return render(request, "customer/dashboard.html", {"user": request.user})
+    if request.user.role == "TECHNICIAN" and not request.user.is_superuser:
+        return redirect("technician_dashboard")
+
+    tickets = RepairTicket.objects.filter(
+        device__customer__user=request.user
+    ).select_related(
+        "device",
+        "device__customer",
+        "technician",
+    ).order_by("-created_at")
+
+    context = {
+        "user": request.user,
+        "recent_tickets": tickets[:4],
+        "active_ticket_count": tickets.filter(
+            status__in=("PENDING", "IN_PROGRESS")
+        ).count(),
+        "completed_ticket_count": tickets.filter(
+            status__in=("DONE", "DELIVERED")
+        ).count(),
+    }
+    return render(request, "customer/dashboard.html", context)
 
 
 @login_required(login_url="accounts:login")
@@ -238,4 +259,8 @@ def notification_detail(request, pk):
     if not notification.is_read:
         notification.is_read = True
         notification.save(update_fields=["is_read"])
-    return render(request, "customer/notification_detail.html", {"notification": notification})
+    return render(
+        request,
+        "customer/notification_detail.html",
+        {"notification": notification},
+    )

@@ -24,6 +24,7 @@ urlpatterns = [
     # -----------------------------
     path("api/booking/", views.create_booking_view, name="create_booking_api"),
     path("api/chat/", views.api_chat_endpoint, name="api_chat"),
+    path("api/ai/diagnose/", views.ai_diagnose_api, name="ai_diagnose_api"),
 
     # -----------------------------
     # Khu vực Kỹ thuật viên

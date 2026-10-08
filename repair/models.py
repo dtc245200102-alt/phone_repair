@@ -131,6 +131,14 @@ class RepairTicket(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Ngày nhận máy")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Cập nhật lần cuối")
+    completed_at = models.DateTimeField(
+        blank=True,
+        null=True,
+        verbose_name="Thời điểm hoàn thành",
+        help_text=(
+            "Được giữ nguyên khi chỉnh sửa phiếu sau khi hoàn thành."
+        ),
+    )
 
     ai_summary = models.TextField(blank=True, null=True, verbose_name="AI Tóm tắt lỗi")
     ai_progress_message = models.TextField(blank=True, null=True, verbose_name="AI Tin nhắn tiến độ")
@@ -145,6 +153,19 @@ class RepairTicket(models.Model):
         return f"Phiếu {self.code or f'#{self.id}'} - {self.device} ({self.get_status_display()})"
 
     def save(self, *args, **kwargs):
+        if self.status in self.COST_VISIBLE_STATUSES:
+            if self.completed_at is None:
+                self.completed_at = timezone.now()
+        else:
+            self.completed_at = None
+
+        update_fields = kwargs.get("update_fields")
+        if update_fields is not None:
+            update_fields = set(update_fields)
+            if "status" in update_fields:
+                update_fields.add("completed_at")
+            kwargs["update_fields"] = update_fields
+
         super().save(*args, **kwargs)
         if not self.code:
             timestamp = (self.created_at or timezone.now()).strftime("%y%m")

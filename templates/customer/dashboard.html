@@ -96,6 +96,77 @@ Bảng điều khiển khách hàng · KhanhThien SmartPhone
 </div>
 
 
+<!-- TÌNH TRẠNG SỬA CHỮA -->
+
+<section class="kt-customer-overview mb-4" aria-labelledby="customer-repairs-title">
+
+    <div class="kt-section-heading">
+        <div>
+            <span class="kt-section-kicker">Cập nhật dịch vụ</span>
+            <h2 class="h4 mb-1" id="customer-repairs-title">Sửa chữa của bạn</h2>
+            <p class="text-secondary small mb-0">
+                Xem nhanh các phiếu gần đây và trạng thái hiện tại.
+            </p>
+        </div>
+
+        <a href="{% url 'repair_progress' %}" class="btn btn-light">
+            Xem tất cả <i class="bi bi-arrow-right ms-1" aria-hidden="true"></i>
+        </a>
+    </div>
+
+    <div class="row g-3 mb-3">
+        <div class="col-sm-6">
+            <div class="kt-overview-metric">
+                <span class="kt-overview-metric-icon kt-overview-metric-icon--active">
+                    <i class="bi bi-tools" aria-hidden="true"></i>
+                </span>
+                <span>
+                    <strong>{{ active_ticket_count }}</strong>
+                    <small>Phiếu đang xử lý</small>
+                </span>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="kt-overview-metric">
+                <span class="kt-overview-metric-icon kt-overview-metric-icon--done">
+                    <i class="bi bi-check2-circle" aria-hidden="true"></i>
+                </span>
+                <span>
+                    <strong>{{ completed_ticket_count }}</strong>
+                    <small>Phiếu đã hoàn tất</small>
+                </span>
+            </div>
+        </div>
+    </div>
+
+    {% if recent_tickets %}
+        <div class="kt-recent-tickets">
+            {% for ticket in recent_tickets %}
+                <a href="{% url 'repair_progress' %}" class="kt-recent-ticket">
+                    <span class="kt-recent-ticket-main">
+                        <strong>{{ ticket.code }}</strong>
+                        <span>{{ ticket.device.brand }} {{ ticket.device.model_name }}</span>
+                        <small>{{ ticket.created_at|date:"d/m/Y" }}</small>
+                    </span>
+                    <span class="badge bg-{{ ticket.status_badge_class }}">
+                        {{ ticket.get_status_display }}
+                    </span>
+                </a>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="kt-empty-state">
+            <span class="kt-empty-state-icon"><i class="bi bi-phone" aria-hidden="true"></i></span>
+            <div>
+                <strong>Chưa có phiếu sửa chữa</strong>
+                <p class="mb-0">Đặt lịch để cửa hàng tiếp nhận và cập nhật tiến độ cho bạn.</p>
+            </div>
+            <a href="{% url 'booking' %}" class="btn btn-primary ms-md-auto">Đặt lịch sửa chữa</a>
+        </div>
+    {% endif %}
+</section>
+
+
 <!-- FEATURES -->
 
 <div class="row g-4">
